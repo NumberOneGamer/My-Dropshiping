@@ -72,7 +72,7 @@ export default async function AdminProductsPage() {
                   </Badge>
                 </td>
                 <td className="px-4 py-3 text-right font-medium">
-                  {formatPrice(product.price)}
+                  {formatPrice(Number(product.price))}
                 </td>
                 <td className="px-4 py-3 text-center text-muted-foreground">
                   {product._count.reviews}

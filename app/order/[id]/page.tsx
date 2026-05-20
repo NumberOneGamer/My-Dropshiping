@@ -75,11 +75,11 @@ export default async function OrderPage({ params }: Props) {
                   <div className="flex-1">
                     <p className="font-medium">{item.name}</p>
                     <p className="text-sm text-muted-foreground">
-                      Qty: {item.quantity} &times; {formatPrice(item.price)}
+                      Qty: {item.quantity} &times; {formatPrice(Number(item.price))}
                     </p>
                   </div>
                   <p className="font-medium">
-                    {formatPrice(item.total)}
+                    {formatPrice(Number(item.total))}
                   </p>
                 </li>
               ))}
@@ -91,25 +91,25 @@ export default async function OrderPage({ params }: Props) {
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Subtotal</span>
-                <span>{formatPrice(order.subtotal)}</span>
+                <span>{formatPrice(Number(order.subtotal))}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Shipping</span>
                 <span>
-                  {order.shippingCost === 0
+                  {Number(order.shippingCost) === 0
                     ? "FREE"
-                    : formatPrice(order.shippingCost)}
+                    : formatPrice(Number(order.shippingCost))}
                 </span>
               </div>
-              {order.discount > 0 && (
+              {Number(order.discount) > 0 && (
                 <div className="flex justify-between text-emerald-600">
                   <span>Discount</span>
-                  <span>-{formatPrice(order.discount)}</span>
+                  <span>-{formatPrice(Number(order.discount))}</span>
                 </div>
               )}
               <div className="flex justify-between border-t border-border/50 pt-2 text-base font-semibold">
                 <span>Total</span>
-                <span>{formatPrice(order.total)}</span>
+                <span>{formatPrice(Number(order.total))}</span>
               </div>
             </div>
           </div>

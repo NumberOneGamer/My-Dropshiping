@@ -16,7 +16,7 @@ const Avatar = React.forwardRef<
     <div
       ref={ref}
       className={cn(
-        "relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full",
+        "relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full border border-border/40",
         className
       )}
       {...props}
@@ -28,7 +28,7 @@ const Avatar = React.forwardRef<
           className="aspect-square h-full w-full object-cover"
         />
       ) : (
-        <div className="flex h-full w-full items-center justify-center bg-muted text-sm font-medium">
+        <div className="flex h-full w-full items-center justify-center bg-muted text-xs font-medium text-muted-foreground">
           {initials || "?"}
         </div>
       )}

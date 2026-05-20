@@ -8,21 +8,21 @@ export interface BadgeProps extends React.HTMLAttributes<HTMLDivElement> {
 function Badge({ className, variant = "default", ...props }: BadgeProps) {
   const variants = {
     default:
-      "bg-primary text-primary-foreground hover:bg-primary/80",
+      "bg-foreground text-background",
     secondary:
-      "bg-secondary text-secondary-foreground hover:bg-secondary/80",
+      "bg-secondary text-secondary-foreground",
     destructive:
-      "bg-destructive text-destructive-foreground hover:bg-destructive/80",
+      "bg-destructive text-destructive-foreground",
     outline:
-      "text-foreground border border-border",
+      "text-foreground border border-border/60",
     success:
-      "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400",
+      "bg-emerald-500/10 text-emerald-500 dark:text-emerald-400",
   };
 
   return (
     <div
       className={cn(
-        "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold transition-colors",
+        "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium tracking-wide transition-colors",
         variants[variant],
         className
       )}

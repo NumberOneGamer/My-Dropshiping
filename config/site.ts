@@ -1,14 +1,14 @@
 export const siteConfig = {
-  name: process.env.NEXT_PUBLIC_SITE_NAME || "Dropship",
+  name: process.env.NEXT_PUBLIC_SITE_NAME || "KAIRO",
   description:
     process.env.NEXT_PUBLIC_SITE_DESCRIPTION ||
-    "Premium products delivered to your door",
+    "Premium products, curated for you",
   url: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
   ogImage: "/images/og.jpg",
   links: {
-    twitter: "https://twitter.com/dropship",
-    instagram: "https://instagram.com/dropship",
-    tiktok: "https://tiktok.com/@dropship",
+    twitter: "https://twitter.com/kairo",
+    instagram: "https://instagram.com/kairo",
+    tiktok: "https://tiktok.com/@kairo",
   },
 };
 

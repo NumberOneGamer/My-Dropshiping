@@ -8,11 +8,11 @@ async function main() {
 
   const adminPassword = await hash("admin123", 12);
   const admin = await prisma.user.upsert({
-    where: { email: "admin@dropship.com" },
+    where: { email: "admin@kairo.com" },
     update: {},
     create: {
       name: "Admin",
-      email: "admin@dropship.com",
+      email: "admin@kairo.com",
       password: adminPassword,
       role: "ADMIN",
     },
@@ -111,8 +111,8 @@ async function main() {
     where: { id: "default" },
     update: {},
     create: {
-      siteName: "Dropship",
-      description: "Premium products delivered to your door",
+      siteName: "KAIRO",
+      description: "Premium products, curated for you",
       announcementText: "Free shipping on orders over $50",
       announcementEnabled: true,
     },

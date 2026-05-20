@@ -31,16 +31,16 @@ export default function WishlistPage() {
   }, [items]);
 
   return (
-    <div className="py-12">
+    <div className="py-16 sm:py-20">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mb-8 flex items-center gap-4">
-          <Button variant="ghost" size="icon" asChild>
+        <div className="mb-10 flex items-center gap-4">
+          <Button variant="ghost" size="icon" asChild className="h-9 w-9">
             <Link href="/">
-              <ArrowLeft className="h-5 w-5" />
+              <ArrowLeft className="h-4 w-4" />
             </Link>
           </Button>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
+            <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">
               Wishlist
             </h1>
             <p className="text-sm text-muted-foreground">
@@ -56,9 +56,9 @@ export default function WishlistPage() {
             ))}
           </div>
         ) : products.length === 0 ? (
-          <div className="flex min-h-[40vh] flex-col items-center justify-center text-center">
-            <Heart className="mb-4 h-16 w-16 text-muted-foreground/30" />
-            <h2 className="mb-2 text-xl font-semibold">
+          <div className="flex min-h-[50vh] flex-col items-center justify-center text-center">
+            <Heart className="mb-4 h-10 w-10 text-muted-foreground/20" />
+            <h2 className="mb-2 text-base font-semibold">
               Your wishlist is empty
             </h2>
             <p className="mb-6 text-sm text-muted-foreground">

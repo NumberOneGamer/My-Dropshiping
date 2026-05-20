@@ -6,7 +6,6 @@ import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar } from "@/components/ui/avatar";
-import { formatPrice } from "@/lib/utils/cn";
 import toast from "react-hot-toast";
 
 interface ReviewListProps {
@@ -63,9 +62,9 @@ export function ReviewList({ reviews, productId }: ReviewListProps) {
       )}
 
       {reviews.map((review) => (
-        <div key={review.id} className="border-b border-border/50 pb-4 last:border-0">
+        <div key={review.id} className="border-b border-border/30 pb-4 last:border-0">
           <div className="mb-2 flex items-center gap-3">
-            <Avatar fallback={review.user.name || "U"} />
+            <Avatar fallback={review.user.name || "U"} className="h-8 w-8 text-[10px]" />
             <div>
               <p className="text-sm font-medium">{review.user.name || "Anonymous"}</p>
               <div className="flex gap-0.5">
@@ -74,8 +73,8 @@ export function ReviewList({ reviews, productId }: ReviewListProps) {
                     key={i}
                     className={`h-3 w-3 ${
                       i < review.rating
-                        ? "fill-yellow-500 text-yellow-500"
-                        : "text-muted-foreground/30"
+                        ? "fill-foreground/70 text-foreground/70"
+                        : "text-muted-foreground/20"
                     }`}
                   />
                 ))}
@@ -86,7 +85,7 @@ export function ReviewList({ reviews, productId }: ReviewListProps) {
             <p className="mb-1 text-sm font-medium">{review.title}</p>
           )}
           {review.comment && (
-            <p className="text-sm text-muted-foreground">{review.comment}</p>
+            <p className="text-sm leading-relaxed text-muted-foreground">{review.comment}</p>
           )}
         </div>
       ))}
@@ -104,8 +103,8 @@ export function ReviewList({ reviews, productId }: ReviewListProps) {
                 <Star
                   className={`h-5 w-5 transition-colors ${
                     star <= rating
-                      ? "fill-yellow-500 text-yellow-500"
-                      : "text-muted-foreground/40 hover:text-muted-foreground/60"
+                      ? "fill-foreground/70 text-foreground/70"
+                      : "text-muted-foreground/30 hover:text-muted-foreground/50"
                   }`}
                 />
               </button>

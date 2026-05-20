@@ -9,7 +9,7 @@ const testimonials = [
     name: "Sarah M.",
     role: "Verified Buyer",
     content:
-      "Absolutely love the quality! The packaging was beautiful and it arrived in just 4 days. Will definitely be ordering again.",
+      "Absolutely love the quality. The packaging was beautiful and it arrived in just 4 days. Will definitely be ordering again.",
     rating: 5,
     avatar: "",
   },
@@ -41,19 +41,20 @@ const testimonials = [
 
 export function Testimonials() {
   return (
-    <section className="py-16 sm:py-24">
+    <section className="border-t border-border/40 py-20 sm:py-28">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="mb-12 text-center"
+          viewport={{ once: true, margin: "-80px" }}
+          transition={{ duration: 0.5 }}
+          className="mb-14 text-center"
         >
-          <p className="mb-3 text-sm font-medium uppercase tracking-widest text-muted-foreground">
+          <p className="mb-3 text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
             Testimonials
           </p>
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-            What Our Customers Say
+          <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+            What Customers Say
           </h2>
         </motion.div>
 
@@ -61,30 +62,32 @@ export function Testimonials() {
           {testimonials.map((t, i) => (
             <motion.div
               key={i}
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.1 }}
-              className="glass-card rounded-xl p-6"
+              viewport={{ once: true, margin: "-40px" }}
+              transition={{ delay: i * 0.06, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+              className="rounded-lg border border-border/40 bg-card/40 p-6 transition-colors hover:border-border/60"
             >
-              <div className="mb-4 flex gap-1">
+              <div className="mb-4 flex gap-0.5">
                 {Array.from({ length: 5 }).map((_, j) => (
                   <Star
                     key={j}
-                    className={`h-4 w-4 ${
+                    className={`h-3.5 w-3.5 ${
                       j < t.rating
-                        ? "fill-yellow-500 text-yellow-500"
-                        : "text-muted-foreground/30"
+                        ? "fill-foreground/80 text-foreground/80"
+                        : "text-muted-foreground/20"
                     }`}
                   />
                 ))}
               </div>
-              <p className="mb-4 text-sm leading-relaxed">&ldquo;{t.content}&rdquo;</p>
+              <p className="mb-5 text-sm leading-relaxed text-muted-foreground">
+                &ldquo;{t.content}&rdquo;
+              </p>
               <div className="flex items-center gap-3">
-                <Avatar fallback={t.name} />
+                <Avatar fallback={t.name} className="h-8 w-8 text-[10px]" />
                 <div>
                   <p className="text-sm font-medium">{t.name}</p>
-                  <p className="text-xs text-muted-foreground">{t.role}</p>
+                  <p className="text-[11px] text-muted-foreground/60">{t.role}</p>
                 </div>
               </div>
             </motion.div>

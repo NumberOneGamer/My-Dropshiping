@@ -157,6 +157,7 @@ model Product {
   @@index([categoryId])
   @@index([status])
   @@index([featured])
+  @@index([isActive, status])
   @@map("products")
 }
 
@@ -195,6 +196,7 @@ model Review {
   user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([productId, userId])
+  @@index([productId, isApproved])
   @@index([productId])
   @@index([userId])
   @@index([isApproved])
@@ -222,7 +224,7 @@ model Order {
   createdAt       DateTime      @default(now()) @map("created_at")
   updatedAt       DateTime      @updatedAt @map("updated_at")
 
-  user    User?       @relation(fields: [userId], references: [id])
+  user    User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
   coupon  Coupon?     @relation(fields: [couponId], references: [id])
   items   OrderItem[]
 
@@ -324,6 +326,8 @@ model CartItem {
 
   @@unique([userId, productId, variantId])
   @@index([userId])
+  @@index([productId])
+  @@index([variantId])
   @@map("cart_items")
 }
 
@@ -359,7 +363,7 @@ model HeroBanner {
 
 model SiteSettings {
   id          String @id @default("default")
-  siteName    String @default("Dropship") @map("site_name")
+  siteName    String @default("KAIRO") @map("site_name")
   description String?
   logo        String?
   favicon     String?

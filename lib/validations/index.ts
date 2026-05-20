@@ -73,6 +73,13 @@ export const checkoutSchema = z.object({
   phone: z.string().optional(),
   couponCode: z.string().optional(),
   notes: z.string().optional(),
+  items: z.array(z.object({
+    productId: z.string(),
+    name: z.string(),
+    price: z.number().positive(),
+    quantity: z.number().int().positive(),
+    image: z.string().optional(),
+  })).min(1, "Cart must have at least one item"),
 });
 
 export const cmsSectionSchema = z.object({

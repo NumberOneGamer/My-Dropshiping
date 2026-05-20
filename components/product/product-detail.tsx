@@ -9,8 +9,6 @@ import {
   Truck,
   Shield,
   RefreshCcw,
-  ChevronLeft,
-  ChevronRight,
   Minus,
   Plus,
   Share2,
@@ -85,52 +83,55 @@ export function ProductDetail({ product, related }: ProductDetailProps) {
   });
 
   return (
-    <div className="pb-24 pt-8">
+    <div className="pb-24 pt-8 sm:pt-12">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="grid gap-8 lg:grid-cols-2 lg:gap-12">
+        <div className="grid gap-10 lg:grid-cols-2 lg:gap-16">
           {/* Image Gallery */}
           <div className="space-y-4">
-            <div className="relative aspect-square overflow-hidden rounded-2xl bg-muted">
+            <div className="relative aspect-square overflow-hidden rounded-xl bg-muted/40">
               <AnimatePresence mode="wait">
                 <motion.img
                   key={selectedImage}
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.3 }}
                   src={product.images[selectedImage] || "/placeholder.svg"}
                   alt={product.name}
                   className="h-full w-full object-cover"
                 />
               </AnimatePresence>
-              <div className="absolute left-3 top-3 flex flex-col gap-2">
-                {discount > 0 && (
-                  <Badge variant="destructive">-{discount}%</Badge>
-                )}
-              </div>
+              {discount > 0 && (
+                <div className="absolute left-4 top-4">
+                  <Badge variant="default" className="text-[10px]">
+                    -{discount}%
+                  </Badge>
+                </div>
+              )}
               <button
                 onClick={() => toggleItem(product.id)}
-                className="absolute right-3 top-3 rounded-full bg-background/80 p-2.5 backdrop-blur-sm transition-colors hover:bg-background"
+                className="absolute right-4 top-4 rounded-full bg-background/80 p-2 backdrop-blur-sm transition-colors hover:bg-background"
               >
                 <Heart
-                  className={`h-5 w-5 ${
+                  className={`h-4 w-4 transition-colors ${
                     isInWishlist(product.id)
-                      ? "fill-red-500 text-red-500"
+                      ? "fill-foreground text-foreground"
                       : "text-muted-foreground"
                   }`}
                 />
               </button>
             </div>
             {product.images.length > 1 && (
-              <div className="flex gap-3 overflow-x-auto pb-2">
+              <div className="flex gap-2 overflow-x-auto pb-1 hide-scrollbar">
                 {product.images.map((img, i) => (
                   <button
                     key={i}
                     onClick={() => setSelectedImage(i)}
                     className={cn(
-                      "relative h-20 w-20 shrink-0 overflow-hidden rounded-xl border-2 transition-all",
+                      "relative h-16 w-16 shrink-0 overflow-hidden rounded-lg border transition-all",
                       i === selectedImage
-                        ? "border-primary"
-                        : "border-transparent opacity-60 hover:opacity-100"
+                        ? "border-foreground/60"
+                        : "border-border/40 opacity-60 hover:opacity-100"
                     )}
                   >
                     <img
@@ -148,15 +149,15 @@ export function ProductDetail({ product, related }: ProductDetailProps) {
           <div className="flex flex-col gap-6">
             <div>
               {product.category && (
-                <p className="mb-2 text-sm text-muted-foreground">
+                <p className="mb-2 text-xs uppercase tracking-wider text-muted-foreground/60">
                   {product.category.name}
                 </p>
               )}
-              <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
+              <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
                 {product.name}
               </h1>
               {product.shortDescription && (
-                <p className="mt-3 text-lg text-muted-foreground">
+                <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
                   {product.shortDescription}
                 </p>
               )}
@@ -164,23 +165,22 @@ export function ProductDetail({ product, related }: ProductDetailProps) {
 
             {/* Price */}
             <div className="flex items-baseline gap-3">
-              <span className="text-3xl font-bold">
+              <span className="text-2xl font-semibold">
                 {formatPrice(product.price)}
               </span>
               {product.comparePrice && (
-                <span className="text-lg text-muted-foreground line-through">
+                <span className="text-base text-muted-foreground/50 line-through">
                   {formatPrice(product.comparePrice)}
                 </span>
-              )}
-              {discount > 0 && (
-                <Badge variant="destructive">Save {discount}%</Badge>
               )}
             </div>
 
             {/* Variants */}
             {product.variants.length > 0 && (
               <div>
-                <p className="mb-3 text-sm font-medium">Options</p>
+                <p className="mb-3 text-xs font-medium uppercase tracking-wider text-muted-foreground/60">
+                  Options
+                </p>
                 <div className="flex flex-wrap gap-2">
                   {product.variants.map((variant) => (
                     <button
@@ -189,16 +189,11 @@ export function ProductDetail({ product, related }: ProductDetailProps) {
                       className={cn(
                         "rounded-lg border px-4 py-2 text-sm transition-all",
                         selectedVariant === variant.id
-                          ? "border-primary bg-primary text-primary-foreground"
-                          : "border-border hover:border-primary/50"
+                          ? "border-foreground/40 bg-foreground/5 text-foreground"
+                          : "border-border/40 text-muted-foreground hover:border-border/60"
                       )}
                     >
                       {variant.name}
-                      {variant.price && (
-                        <span className="ml-1 text-xs opacity-70">
-                          ({formatPrice(variant.price)})
-                        </span>
-                      )}
                     </button>
                   ))}
                 </div>
@@ -207,47 +202,47 @@ export function ProductDetail({ product, related }: ProductDetailProps) {
 
             {/* Quantity */}
             <div>
-              <p className="mb-3 text-sm font-medium">Quantity</p>
-              <div className="flex items-center gap-3">
-                <div className="flex items-center rounded-lg border border-border">
-                  <button
-                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="p-3 hover:bg-accent"
-                  >
-                    <Minus className="h-4 w-4" />
-                  </button>
-                  <span className="w-12 text-center text-sm font-medium">
-                    {quantity}
-                  </span>
-                  <button
-                    onClick={() => setQuantity(quantity + 1)}
-                    className="p-3 hover:bg-accent"
-                  >
-                    <Plus className="h-4 w-4" />
-                  </button>
-                </div>
+              <p className="mb-3 text-xs font-medium uppercase tracking-wider text-muted-foreground/60">
+                Quantity
+              </p>
+              <div className="inline-flex items-center rounded-lg border border-border/40">
+                <button
+                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                  className="p-2.5 text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  <Minus className="h-3.5 w-3.5" />
+                </button>
+                <span className="w-10 text-center text-sm font-medium tabular-nums">
+                  {quantity}
+                </span>
+                <button
+                  onClick={() => setQuantity(quantity + 1)}
+                  className="p-2.5 text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                </button>
               </div>
             </div>
 
             {/* CTA Buttons */}
-            <div className="flex flex-col gap-3 sm:flex-row">
+            <div className="flex flex-col gap-2.5 sm:flex-row">
               <Button
-                size="xl"
+                size="lg"
                 onClick={handleBuyNow}
                 className="flex-1 gap-2"
               >
-                <ShoppingBag className="h-5 w-5" />
+                <ShoppingBag className="h-4 w-4" />
                 Buy Now
               </Button>
               <Button
-                size="xl"
+                size="lg"
                 variant="outline"
                 onClick={handleAddToCart}
                 className="flex-1 gap-2"
               >
                 {added ? (
                   <>
-                    <Check className="h-5 w-5" /> Added
+                    <Check className="h-4 w-4" /> Added
                   </>
                 ) : (
                   "Add to Cart"
@@ -256,33 +251,33 @@ export function ProductDetail({ product, related }: ProductDetailProps) {
             </div>
 
             {/* Trust Badges */}
-            <div className="grid grid-cols-3 gap-3 rounded-xl border border-border/50 p-4">
+            <div className="grid grid-cols-3 gap-4 rounded-lg border border-border/40 p-4">
               <div className="text-center">
-                <Truck className="mx-auto mb-1 h-5 w-5 text-muted-foreground" />
-                <p className="text-xs text-muted-foreground">Free Shipping</p>
+                <Truck className="mx-auto mb-2 h-4 w-4 text-muted-foreground" />
+                <p className="text-[11px] text-muted-foreground">Free Shipping</p>
               </div>
               <div className="text-center">
-                <Shield className="mx-auto mb-1 h-5 w-5 text-muted-foreground" />
-                <p className="text-xs text-muted-foreground">Secure Checkout</p>
+                <Shield className="mx-auto mb-2 h-4 w-4 text-muted-foreground" />
+                <p className="text-[11px] text-muted-foreground">Secure Checkout</p>
               </div>
               <div className="text-center">
-                <RefreshCcw className="mx-auto mb-1 h-5 w-5 text-muted-foreground" />
-                <p className="text-xs text-muted-foreground">Easy Returns</p>
+                <RefreshCcw className="mx-auto mb-2 h-4 w-4 text-muted-foreground" />
+                <p className="text-[11px] text-muted-foreground">Easy Returns</p>
               </div>
             </div>
 
             {/* Description & Details */}
             <Accordion type="multiple" className="w-full">
               <AccordionItem value="description">
-                <AccordionTrigger>Description</AccordionTrigger>
+                <AccordionTrigger className="text-sm font-medium">Description</AccordionTrigger>
                 <AccordionContent>
-                  <div className="rich-text text-sm text-muted-foreground">
+                  <div className="rich-text text-sm">
                     {product.description || "No description available."}
                   </div>
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem value="reviews">
-                <AccordionTrigger>
+                <AccordionTrigger className="text-sm font-medium">
                   Reviews ({product.reviews.length})
                 </AccordionTrigger>
                 <AccordionContent>
@@ -290,8 +285,8 @@ export function ProductDetail({ product, related }: ProductDetailProps) {
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem value="shipping">
-                <AccordionTrigger>Shipping & Returns</AccordionTrigger>
-                <AccordionContent className="text-sm text-muted-foreground">
+                <AccordionTrigger className="text-sm font-medium">Shipping & Returns</AccordionTrigger>
+                <AccordionContent className="text-sm">
                   <p className="mb-2">
                     Free shipping on all orders over $50. Orders typically arrive
                     within 3-5 business days.
@@ -308,8 +303,8 @@ export function ProductDetail({ product, related }: ProductDetailProps) {
 
         {/* Related Products */}
         {related.length > 0 && (
-          <div className="mt-16">
-            <h2 className="mb-8 text-2xl font-bold">You May Also Like</h2>
+          <div className="mt-20 border-t border-border/40 pt-16">
+            <h2 className="mb-10 text-xl font-semibold tracking-tight">You May Also Like</h2>
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
               {related.map((p: any) => (
                 <ProductCard key={p.id} product={p} />

@@ -30,89 +30,71 @@ async function getStats() {
 export default async function AdminDashboardPage() {
   const stats = await getStats();
 
+  const statCards = [
+    { title: "Revenue", value: formatPrice(Number(stats.totalRevenue)), icon: DollarSign },
+    { title: "Orders", value: stats.totalOrders.toString(), icon: ShoppingCart },
+    { title: "Products", value: stats.totalProducts.toString(), icon: Package },
+    { title: "Customers", value: stats.totalCustomers.toString(), icon: Users },
+  ];
+
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
-        <p className="text-sm text-muted-foreground">
+        <h1 className="text-xl font-semibold tracking-tight">Dashboard</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
           Overview of your store
         </p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">
-              Total Revenue
-            </CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {formatPrice(Number(stats.totalRevenue))}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Orders</CardTitle>
-            <ShoppingCart className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.totalOrders}</div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Products</CardTitle>
-            <Package className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.totalProducts}</div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Customers</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.totalCustomers}</div>
-          </CardContent>
-        </Card>
+        {statCards.map((stat) => (
+          <Card key={stat.title}>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                {stat.title}
+              </CardTitle>
+              <stat.icon className="h-3.5 w-3.5 text-muted-foreground/60" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-xl font-semibold tabular-nums">
+                {stat.value}
+              </div>
+            </CardContent>
+          </Card>
+        ))}
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Recent Orders</CardTitle>
+          <CardTitle className="text-sm font-semibold">Recent Orders</CardTitle>
         </CardHeader>
         <CardContent>
           {stats.recentOrders.length === 0 ? (
             <p className="text-sm text-muted-foreground">No orders yet</p>
           ) : (
-            <div className="space-y-4">
-              {stats.recentOrders.map((order) => (
+            <div className="space-y-0">
+              {stats.recentOrders.map((order, i) => (
                 <div
                   key={order.id}
-                  className="flex items-center justify-between border-b border-border/50 pb-3 last:border-0 last:pb-0"
+                  className={cn(
+                    "flex items-center justify-between py-3",
+                    i < stats.recentOrders.length - 1 && "border-b border-border/30"
+                  )}
                 >
                   <div>
-                    <p className="text-sm font-medium">
+                    <p className="text-sm font-medium font-mono">
                       {order.orderNumber}
                     </p>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-muted-foreground/60">
                       {order.email}
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm font-medium">
+                    <p className="text-sm font-medium tabular-nums">
                       {formatPrice(Number(order.total))}
                     </p>
-                    <p className="text-xs text-muted-foreground">
-                      {order.status}
+                    <p className="text-[11px] text-muted-foreground/60 capitalize">
+                      {order.status.toLowerCase()}
                     </p>
                   </div>
                 </div>
@@ -123,6 +105,10 @@ export default async function AdminDashboardPage() {
       </Card>
     </div>
   );
+}
+
+function cn(...classes: (string | false | undefined | null)[]) {
+  return classes.filter(Boolean).join(" ");
 }
 
 export const runtime = 'edge';

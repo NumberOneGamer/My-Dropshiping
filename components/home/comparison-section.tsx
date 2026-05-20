@@ -16,38 +16,40 @@ const comparisons = [
 
 export function ComparisonSection() {
   return (
-    <section className="border-t border-border/50 bg-secondary/20 py-16 sm:py-24">
-      <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+    <section className="border-t border-border/40 py-20 sm:py-28">
+      <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="mb-12 text-center"
+          viewport={{ once: true, margin: "-80px" }}
+          transition={{ duration: 0.5 }}
+          className="mb-14 text-center"
         >
-          <p className="mb-3 text-sm font-medium uppercase tracking-widest text-muted-foreground">
-            Why We&apos;re Different
+          <p className="mb-3 text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
+            Comparison
           </p>
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+          <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
             We Compare, You Decide
           </h2>
         </motion.div>
 
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="overflow-hidden rounded-xl border border-border/50 bg-background"
+          viewport={{ once: true, margin: "-40px" }}
+          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          className="overflow-hidden rounded-lg border border-border/40"
         >
           <table className="w-full">
             <thead>
-              <tr className="border-b border-border/50 bg-secondary/50">
-                <th className="px-6 py-4 text-left text-sm font-medium">
-                  Features
+              <tr className="border-b border-border/40 bg-muted/30">
+                <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                  Feature
                 </th>
-                <th className="px-6 py-4 text-center text-sm font-medium">
-                  <span className="text-primary">Dropship</span>
+                <th className="px-6 py-4 text-center text-xs font-semibold uppercase tracking-wider">
+                  KAIRO
                 </th>
-                <th className="px-6 py-4 text-center text-sm font-medium text-muted-foreground">
+                <th className="px-6 py-4 text-center text-xs font-medium uppercase tracking-wider text-muted-foreground/60">
                   Others
                 </th>
               </tr>
@@ -56,23 +58,21 @@ export function ComparisonSection() {
               {comparisons.map((row, i) => (
                 <tr
                   key={row.feature}
-                  className="border-b border-border/50 last:border-0"
+                  className="border-b border-border/30 last:border-0"
                 >
                   <td className="px-6 py-4 text-sm">{row.feature}</td>
                   <td className="px-6 py-4 text-center">
                     {row.us === true ? (
-                      <Check className="mx-auto h-5 w-5 text-emerald-500" />
+                      <Check className="mx-auto h-4 w-4 text-foreground/80" />
                     ) : (
-                      <span className="text-sm font-medium text-emerald-500">
-                        {row.us}
-                      </span>
+                      <span className="text-sm font-medium">{row.us}</span>
                     )}
                   </td>
                   <td className="px-6 py-4 text-center">
                     {row.others === false ? (
-                      <X className="mx-auto h-5 w-5 text-red-400" />
+                      <X className="mx-auto h-4 w-4 text-muted-foreground/30" />
                     ) : (
-                      <span className="text-sm text-muted-foreground">
+                      <span className="text-sm text-muted-foreground/60">
                         {row.others}
                       </span>
                     )}
@@ -87,7 +87,8 @@ export function ComparisonSection() {
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
-          className="mt-8 text-center"
+          transition={{ delay: 0.2 }}
+          className="mt-10 text-center"
         >
           <Button asChild size="lg">
             <Link href="/search">Experience the Difference</Link>

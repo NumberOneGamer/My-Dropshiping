@@ -37,41 +37,43 @@ export function CartDrawer() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-[2px]"
             onClick={closeCart}
           />
           <motion.div
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
-            transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="fixed inset-y-0 right-0 z-50 flex w-full max-w-sm flex-col border-l border-border/50 bg-background shadow-xl"
+            transition={{ type: "spring", damping: 30, stiffness: 300, mass: 0.8 }}
+            className="fixed inset-y-0 right-0 z-50 flex w-full max-w-md flex-col border-l border-border/40 bg-background shadow-2xl"
           >
-            <div className="flex items-center justify-between border-b border-border/50 px-4 py-4">
-              <div className="flex items-center gap-2">
-                <ShoppingBag className="h-5 w-5" />
-                <span className="font-semibold">
+            <div className="flex items-center justify-between border-b border-border/40 px-5 py-4">
+              <div className="flex items-center gap-2.5">
+                <ShoppingBag className="h-4 w-4" />
+                <span className="text-sm font-semibold">
                   Cart ({count})
                 </span>
               </div>
               <button
                 onClick={closeCart}
-                className="rounded-lg p-1.5 text-muted-foreground hover:bg-accent"
+                className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent/50"
               >
-                <X className="h-5 w-5" />
+                <X className="h-4 w-4" />
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto px-4 py-4">
+            <div className="flex-1 overflow-y-auto px-5 py-5">
               {items.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-12 text-center">
-                  <ShoppingBag className="mb-4 h-12 w-12 text-muted-foreground/50" />
-                  <p className="text-sm text-muted-foreground">
-                    Your cart is empty
+                <div className="flex flex-col items-center justify-center py-16 text-center">
+                  <ShoppingBag className="mb-4 h-10 w-10 text-muted-foreground/30" />
+                  <p className="text-sm font-medium">Your cart is empty</p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Add items to get started
                   </p>
                   <Button
                     variant="outline"
-                    className="mt-4"
+                    className="mt-6"
                     onClick={() => {
                       closeCart();
                       router.push("/search");
@@ -81,13 +83,14 @@ export function CartDrawer() {
                   </Button>
                 </div>
               ) : (
-                <ul className="space-y-4">
+                <ul className="space-y-5">
                   {items.map((item) => (
-                    <li
+                    <motion.li
                       key={`${item.productId}-${item.variantId}`}
-                      className="flex gap-3"
+                      layout
+                      className="flex gap-4"
                     >
-                      <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-muted">
+                      <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-muted/40">
                         <Image
                           src={item.image || "/placeholder.svg"}
                           alt={item.name}
@@ -96,26 +99,26 @@ export function CartDrawer() {
                         />
                       </div>
                       <div className="flex flex-1 flex-col justify-between">
-                        <div className="flex justify-between">
-                          <div>
-                            <p className="text-sm font-medium line-clamp-1">
+                        <div className="flex justify-between gap-3">
+                          <div className="min-w-0">
+                            <p className="text-sm font-medium leading-snug line-clamp-1">
                               {item.name}
                             </p>
                             {item.variantName && (
-                              <p className="text-xs text-muted-foreground">
+                              <p className="mt-0.5 text-xs text-muted-foreground/60">
                                 {item.variantName}
                               </p>
                             )}
                           </div>
                           <button
                             onClick={() => removeItem(item.productId, item.variantId)}
-                            className="shrink-0 text-muted-foreground hover:text-destructive"
+                            className="shrink-0 text-muted-foreground/40 transition-colors hover:text-destructive"
                           >
-                            <Trash2 className="h-4 w-4" />
+                            <Trash2 className="h-3.5 w-3.5" />
                           </button>
                         </div>
                         <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-1">
+                          <div className="inline-flex items-center rounded-md border border-border/40">
                             <button
                               onClick={() =>
                                 updateQuantity(
@@ -124,11 +127,11 @@ export function CartDrawer() {
                                   item.variantId
                                 )
                               }
-                              className="rounded-md p-1 hover:bg-accent"
+                              className="p-1.5 text-muted-foreground transition-colors hover:text-foreground"
                             >
                               <Minus className="h-3 w-3" />
                             </button>
-                            <span className="w-8 text-center text-sm">
+                            <span className="w-7 text-center text-xs font-medium tabular-nums">
                               {item.quantity}
                             </span>
                             <button
@@ -139,29 +142,29 @@ export function CartDrawer() {
                                   item.variantId
                                 )
                               }
-                              className="rounded-md p-1 hover:bg-accent"
+                              className="p-1.5 text-muted-foreground transition-colors hover:text-foreground"
                             >
                               <Plus className="h-3 w-3" />
                             </button>
                           </div>
-                          <p className="text-sm font-medium">
+                          <p className="text-sm font-medium tabular-nums">
                             {formatPrice(item.price * item.quantity)}
                           </p>
                         </div>
                       </div>
-                    </li>
+                    </motion.li>
                   ))}
                 </ul>
               )}
             </div>
 
             {items.length > 0 && (
-              <div className="border-t border-border/50 px-4 py-4">
+              <div className="border-t border-border/40 px-5 py-5">
                 <div className="mb-1 flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">Subtotal</span>
-                  <span className="font-medium">{formatPrice(subtotal)}</span>
+                  <span className="font-semibold tabular-nums">{formatPrice(subtotal)}</span>
                 </div>
-                <p className="mb-4 text-xs text-muted-foreground">
+                <p className="mb-4 text-xs text-muted-foreground/60">
                   Shipping calculated at checkout
                 </p>
                 <Button
@@ -169,7 +172,7 @@ export function CartDrawer() {
                   className="w-full"
                   size="lg"
                 >
-                  Checkout &mdash; {formatPrice(subtotal)}
+                  Checkout — {formatPrice(subtotal)}
                 </Button>
               </div>
             )}

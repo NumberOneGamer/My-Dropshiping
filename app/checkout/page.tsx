@@ -34,7 +34,7 @@ export default function CheckoutPage() {
   if (items.length === 0) {
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center py-12 text-center">
-        <p className="text-lg font-medium">Your cart is empty</p>
+        <p className="text-sm font-medium">Your cart is empty</p>
         <Button asChild className="mt-4">
           <Link href="/search">Continue Shopping</Link>
         </Button>
@@ -69,6 +69,7 @@ export default function CheckoutPage() {
       const data = await res.json();
 
       if (data.url) {
+        clearCart();
         window.location.href = data.url;
       } else {
         toast.error(data.error || "Something went wrong");
@@ -85,56 +86,59 @@ export default function CheckoutPage() {
   };
 
   return (
-    <div className="py-12">
+    <div className="py-16 sm:py-20">
       <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-        <div className="mb-8 flex items-center gap-4">
-          <Button variant="ghost" size="icon" asChild>
+        <div className="mb-10 flex items-center gap-4">
+          <Button variant="ghost" size="icon" asChild className="h-9 w-9">
             <Link href="/cart">
-              <ArrowLeft className="h-5 w-5" />
+              <ArrowLeft className="h-4 w-4" />
             </Link>
           </Button>
-          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
+          <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">
             Checkout
           </h1>
         </div>
 
         <form onSubmit={handleSubmit}>
           <div className="grid gap-8 lg:grid-cols-5">
-            <div className="space-y-6 lg:col-span-3">
+            <div className="space-y-5 lg:col-span-3">
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="rounded-xl border border-border/50 p-6"
+                className="rounded-lg border border-border/40 p-5"
               >
-                <h2 className="mb-4 font-semibold">Contact</h2>
+                <h2 className="mb-4 text-sm font-semibold">Contact</h2>
                 <Input
                   type="email"
                   value={form.email}
                   onChange={(e) => updateField("email", e.target.value)}
                   placeholder="Email address"
                   required
+                  className="h-10"
                 />
               </motion.div>
 
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
-                className="rounded-xl border border-border/50 p-6"
+                transition={{ delay: 0.05 }}
+                className="rounded-lg border border-border/40 p-5"
               >
-                <h2 className="mb-4 font-semibold">Shipping</h2>
+                <h2 className="mb-4 text-sm font-semibold">Shipping</h2>
                 <div className="grid gap-3 sm:grid-cols-2">
                   <Input
                     value={form.firstName}
                     onChange={(e) => updateField("firstName", e.target.value)}
                     placeholder="First name"
                     required
+                    className="h-10"
                   />
                   <Input
                     value={form.lastName}
                     onChange={(e) => updateField("lastName", e.target.value)}
                     placeholder="Last name"
                     required
+                    className="h-10"
                   />
                   <div className="sm:col-span-2">
                     <Input
@@ -142,6 +146,7 @@ export default function CheckoutPage() {
                       onChange={(e) => updateField("line1", e.target.value)}
                       placeholder="Address"
                       required
+                      className="h-10"
                     />
                   </div>
                   <div className="sm:col-span-2">
@@ -149,6 +154,7 @@ export default function CheckoutPage() {
                       value={form.line2}
                       onChange={(e) => updateField("line2", e.target.value)}
                       placeholder="Apartment, suite, etc. (optional)"
+                      className="h-10"
                     />
                   </div>
                   <Input
@@ -156,38 +162,42 @@ export default function CheckoutPage() {
                     onChange={(e) => updateField("city", e.target.value)}
                     placeholder="City"
                     required
+                    className="h-10"
                   />
                   <Input
                     value={form.state}
                     onChange={(e) => updateField("state", e.target.value)}
                     placeholder="State"
+                    className="h-10"
                   />
                   <Input
                     value={form.zip}
                     onChange={(e) => updateField("zip", e.target.value)}
                     placeholder="ZIP code"
                     required
+                    className="h-10"
                   />
                   <Input
                     value={form.phone}
                     onChange={(e) => updateField("phone", e.target.value)}
                     placeholder="Phone (optional)"
                     type="tel"
+                    className="h-10"
                   />
                 </div>
               </motion.div>
 
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                className="rounded-xl border border-border/50 p-6"
+                transition={{ delay: 0.1 }}
+                className="rounded-lg border border-border/40 p-5"
               >
                 <div className="flex items-center gap-3">
-                  <CreditCard className="h-5 w-5 text-muted-foreground" />
+                  <CreditCard className="h-4 w-4 text-muted-foreground/60" />
                   <div>
-                    <p className="font-medium">Pay with Stripe</p>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm font-medium">Pay with Stripe</p>
+                    <p className="text-xs text-muted-foreground/60">
                       You will be redirected to complete your payment securely.
                     </p>
                   </div>
@@ -196,8 +206,8 @@ export default function CheckoutPage() {
             </div>
 
             <div className="lg:col-span-2">
-              <div className="sticky top-24 space-y-4 rounded-xl border border-border/50 p-6">
-                <h2 className="font-semibold">Order Summary</h2>
+              <div className="sticky top-24 space-y-5 rounded-lg border border-border/40 p-5">
+                <h2 className="text-sm font-semibold">Order Summary</h2>
 
                 <div className="space-y-3">
                   {items.map((item) => (
@@ -205,46 +215,46 @@ export default function CheckoutPage() {
                       key={`${item.productId}-${item.variantId}`}
                       className="flex items-center gap-3"
                     >
-                      <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-muted">
+                      <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-md bg-muted/40">
                         <img
                           src={item.image || "/placeholder.svg"}
                           alt={item.name}
                           className="h-full w-full object-cover"
                         />
                       </div>
-                      <div className="flex-1 text-sm">
+                      <div className="flex-1 text-xs">
                         <p className="line-clamp-1 font-medium">{item.name}</p>
-                        <p className="text-muted-foreground">
+                        <p className="text-muted-foreground/60">
                           Qty: {item.quantity}
                         </p>
                       </div>
-                      <p className="text-sm font-medium">
+                      <p className="text-xs font-medium tabular-nums">
                         {formatPrice(item.price * item.quantity)}
                       </p>
                     </div>
                   ))}
                 </div>
 
-                <div className="space-y-2 border-t border-border/50 pt-4 text-sm">
+                <div className="space-y-2 border-t border-border/40 pt-4 text-xs">
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Subtotal</span>
-                    <span>{formatPrice(subtotal)}</span>
+                    <span className="tabular-nums">{formatPrice(subtotal)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Shipping</span>
-                    <span>
+                    <span className="tabular-nums">
                       {shipping === 0 ? "FREE" : formatPrice(shipping)}
                     </span>
                   </div>
                   {discount > 0 && (
-                    <div className="flex justify-between text-emerald-600">
+                    <div className="flex justify-between text-foreground/70">
                       <span>Discount</span>
-                      <span>-{formatPrice(discount)}</span>
+                      <span className="tabular-nums">-{formatPrice(discount)}</span>
                     </div>
                   )}
-                  <div className="flex justify-between border-t border-border/50 pt-2 text-base font-semibold">
+                  <div className="flex justify-between border-t border-border/40 pt-2 text-sm font-semibold">
                     <span>Total</span>
-                    <span>{formatPrice(total)}</span>
+                    <span className="tabular-nums">{formatPrice(total)}</span>
                   </div>
                 </div>
 
@@ -254,11 +264,11 @@ export default function CheckoutPage() {
                   size="lg"
                   disabled={loading}
                 >
-                  <Lock className="h-4 w-4" />
+                  <Lock className="h-3.5 w-3.5" />
                   {loading ? "Redirecting..." : `Pay ${formatPrice(total)}`}
                 </Button>
 
-                <p className="text-center text-xs text-muted-foreground">
+                <p className="text-center text-[11px] text-muted-foreground/50">
                   Secure checkout powered by Stripe
                 </p>
               </div>

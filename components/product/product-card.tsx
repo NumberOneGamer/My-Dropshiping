@@ -25,20 +25,22 @@ export function ProductCard({ product }: ProductCardProps) {
     : 0;
 
   return (
-    <div className="group relative">
+    <div className="group">
       <Link href={`/products/${product.slug}`}>
-        <div className="relative mb-3 aspect-square overflow-hidden rounded-xl bg-muted">
+        <div className="relative mb-3 aspect-square overflow-hidden rounded-lg bg-muted/40">
           <img
             src={product.images[0] || "/placeholder.svg"}
             alt={product.name}
-            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+            className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
             loading="lazy"
           />
-          <div className="absolute left-3 top-3 flex flex-col gap-2">
-            {discount > 0 && (
-              <Badge variant="destructive">-{discount}%</Badge>
-            )}
-          </div>
+          {discount > 0 && (
+            <div className="absolute left-3 top-3">
+              <Badge variant="default" className="text-[10px]">
+                -{discount}%
+              </Badge>
+            </div>
+          )}
         </div>
       </Link>
 
@@ -47,32 +49,35 @@ export function ProductCard({ product }: ProductCardProps) {
           e.preventDefault();
           toggleItem(product.id);
         }}
-        className="absolute right-3 top-3 z-10 rounded-full bg-background/80 p-2 backdrop-blur-sm transition-colors hover:bg-background"
+        className="absolute right-4 top-4 z-10 rounded-full bg-background/80 p-2 backdrop-blur-sm opacity-0 transition-all duration-200 hover:bg-background group-hover:opacity-100"
+        aria-label="Add to wishlist"
       >
         <Heart
-          className={`h-4 w-4 ${
+          className={`h-4 w-4 transition-colors ${
             isInWishlist(product.id)
-              ? "fill-red-500 text-red-500"
+              ? "fill-foreground text-foreground"
               : "text-muted-foreground"
           }`}
         />
       </button>
 
-      <div className="space-y-1">
+      <div className="space-y-1.5">
         {product.category && (
-          <p className="text-xs text-muted-foreground">
+          <p className="text-[11px] uppercase tracking-wider text-muted-foreground/60">
             {product.category.name}
           </p>
         )}
         <Link href={`/products/${product.slug}`}>
-          <h3 className="font-medium line-clamp-1 hover:opacity-70">
+          <h3 className="text-sm font-medium leading-snug transition-colors hover:text-foreground/70">
             {product.name}
           </h3>
         </Link>
-        <div className="flex items-center gap-2">
-          <span className="font-semibold">{formatPrice(product.price)}</span>
+        <div className="flex items-baseline gap-2">
+          <span className="text-sm font-semibold">
+            {formatPrice(product.price)}
+          </span>
           {product.comparePrice && (
-            <span className="text-sm text-muted-foreground line-through">
+            <span className="text-xs text-muted-foreground/50 line-through">
               {formatPrice(product.comparePrice)}
             </span>
           )}

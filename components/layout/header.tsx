@@ -38,7 +38,7 @@ export function Header() {
             href="/"
             className="flex items-center gap-2"
           >
-            <img src="/logo.png" alt="KAIRO" className="h-7 w-auto" />
+            <img src="/logo.png" alt="KAIRO" className="h-12 w-auto" />
           </Link>
 
           <nav className="hidden items-center gap-0.5 md:flex">

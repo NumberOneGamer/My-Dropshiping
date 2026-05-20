@@ -1,9 +1,20 @@
 import Stripe from "stripe";
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2025-02-24.acacia",
-  typescript: true,
-});
+let stripeInstance: Stripe | null = null;
+
+export function getStripe(): Stripe {
+  if (!stripeInstance) {
+    const key = process.env.STRIPE_SECRET_KEY;
+    if (!key) {
+      throw new Error("STRIPE_SECRET_KEY is not set");
+    }
+    stripeInstance = new Stripe(key, {
+      apiVersion: "2025-02-24.acacia",
+      typescript: true,
+    });
+  }
+  return stripeInstance;
+}
 
 export async function createCheckoutSession(params: {
   items: { name: string; price: number; quantity: number; image?: string; productId: string }[];
@@ -13,6 +24,8 @@ export async function createCheckoutSession(params: {
   successUrl: string;
   cancelUrl: string;
 }) {
+  const stripe = getStripe();
+
   const lineItems = params.items.map((item) => ({
     price_data: {
       currency: "usd",
@@ -47,6 +60,7 @@ export async function constructStripeWebhook(
   payload: string,
   signature: string
 ) {
+  const stripe = getStripe();
   return stripe.webhooks.constructEvent(
     payload,
     signature,

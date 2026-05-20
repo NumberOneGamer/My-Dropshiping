@@ -4,7 +4,9 @@ import Credentials from "next-auth/providers/credentials";
 import { compare } from "bcryptjs";
 import { prisma } from "@/lib/db/prisma";
 
-const config = {
+const secret = process.env.AUTH_SECRET || (typeof crypto !== "undefined" ? crypto.randomUUID?.() : "dev-secret-at-least-32-chars-long!!");
+
+const config = { secret,
   providers: [
     Google({
       clientId: process.env.AUTH_GOOGLE_ID,
@@ -81,5 +83,21 @@ const config = {
   session: { strategy: "jwt" },
 };
 
-// @ts-expect-error - next-auth v5 beta type resolution issue with bundler module resolution
-export const { handlers, signIn, signOut, auth } = NextAuth(config);
+let _auth: any = null;
+function getAuth() {
+  if (!_auth) {
+    try {
+      // @ts-expect-error
+      _auth = NextAuth(config);
+    } catch (e) {
+      console.error("Auth initialization failed:", e);
+      throw e;
+    }
+  }
+  return _auth;
+}
+
+export const handlers = { GET: (req: Request) => getAuth().handlers.GET(req), POST: (req: Request) => getAuth().handlers.POST(req) };
+export const signIn = (...args: any[]) => getAuth().signIn(...args);
+export const signOut = (...args: any[]) => getAuth().signOut(...args);
+export const auth = (...args: any[]) => getAuth().auth(...args);

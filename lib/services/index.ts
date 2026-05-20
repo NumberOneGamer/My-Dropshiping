@@ -71,13 +71,13 @@ export const services = {
       couponId?: string;
       shippingAddress?: any;
     }) {
-      const { prisma, generateOrderNumber } = await Promise.all([
+      const [prismaModule, cnModule] = await Promise.all([
         import("@/lib/db/prisma"),
         import("@/lib/utils/cn"),
       ]);
-      const orderNumber = generateOrderNumber.generateOrderNumber();
+      const orderNumber = cnModule.generateOrderNumber();
 
-      return prisma.prisma.order.create({
+      return prismaModule.prisma.order.create({
         data: {
           orderNumber,
           userId: data.userId,

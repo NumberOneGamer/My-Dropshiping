@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
-import { createCheckoutSession } from "@/lib/stripe";
 import { generateOrderNumber } from "@/lib/utils/cn";
+import { createCheckoutSession } from "@/lib/stripe";
 
 export async function POST(req: NextRequest) {
   try {

@@ -55,7 +55,7 @@ const SheetContent = React.forwardRef<
           "data-[state=closed]:slide-out-to-top data-[state=open]:slide-in-from-top",
         side === "bottom" &&
           "data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom",
-        sheetVariants[side],
+        sheetVariants[side as keyof typeof sheetVariants],
         className
       )}
       {...props}

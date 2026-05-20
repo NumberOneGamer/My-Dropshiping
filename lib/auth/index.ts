@@ -4,7 +4,7 @@ import Credentials from "next-auth/providers/credentials";
 import { compare } from "bcryptjs";
 import { prisma } from "@/lib/db/prisma";
 
-export const { handlers, signIn, signOut, auth } = NextAuth({
+const config = {
   providers: [
     Google({
       clientId: process.env.AUTH_GOOGLE_ID,
@@ -15,7 +15,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(credentials) {
+      async authorize(credentials: any) {
         if (!credentials?.email || !credentials?.password) return null;
 
         const user = await prisma.user.findUnique({
@@ -42,21 +42,21 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user }: any) {
       if (user) {
         token.role = (user as any).role;
         token.id = user.id;
       }
       return token;
     },
-    async session({ session, token }) {
+    async session({ session, token }: any) {
       if (session.user) {
         (session.user as any).role = token.role;
         (session.user as any).id = token.id;
       }
       return session;
     },
-    async signIn({ user }) {
+    async signIn({ user }: any) {
       if (user.email) {
         const existing = await prisma.user.findUnique({
           where: { email: user.email },
@@ -79,4 +79,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     error: "/auth/login",
   },
   session: { strategy: "jwt" },
-});
+};
+
+// @ts-expect-error - next-auth v5 beta type resolution issue with bundler module resolution
+export const { handlers, signIn, signOut, auth } = NextAuth(config);

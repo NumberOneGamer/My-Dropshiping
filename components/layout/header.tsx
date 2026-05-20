@@ -36,9 +36,9 @@ export function Header() {
         <div className="flex items-center gap-8">
           <Link
             href="/"
-            className="text-lg font-semibold tracking-[0.15em] uppercase"
+            className="flex items-center gap-2"
           >
-            KAIRO
+            <img src="/logo.png" alt="KAIRO" className="h-7 w-auto" />
           </Link>
 
           <nav className="hidden items-center gap-0.5 md:flex">

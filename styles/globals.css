@@ -1,0 +1,107 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 3.9%;
+    --primary: 0 0% 9%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 0 0% 96.1%;
+    --secondary-foreground: 0 0% 9%;
+    --muted: 0 0% 96.1%;
+    --muted-foreground: 0 0% 45.1%;
+    --accent: 0 0% 96.1%;
+    --accent-foreground: 0 0% 9%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 89.8%;
+    --input: 0 0% 89.8%;
+    --ring: 0 0% 3.9%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 0 0% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 0 0% 9%;
+    --secondary: 0 0% 14.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 14.9%;
+    --muted-foreground: 0 0% 63.9%;
+    --accent: 0 0% 14.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 14.9%;
+    --input: 0 0% 14.9%;
+    --ring: 0 0% 83.1%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+}
+
+@layer utilities {
+  .glass {
+    @apply backdrop-blur-xl bg-white/70 dark:bg-black/70 border border-white/20 dark:border-white/10;
+  }
+  .glass-card {
+    @apply backdrop-blur-md bg-white/50 dark:bg-white/5 border border-white/20 dark:border-white/10 shadow-sm;
+  }
+  .text-balance {
+    text-wrap: balance;
+  }
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.skeleton {
+  @apply animate-pulse bg-muted rounded-md;
+}
+
+.rich-text h1 {
+  @apply text-3xl font-bold mb-4;
+}
+.rich-text h2 {
+  @apply text-2xl font-bold mb-3;
+}
+.rich-text h3 {
+  @apply text-xl font-bold mb-2;
+}
+.rich-text p {
+  @apply mb-4 leading-relaxed;
+}
+.rich-text ul {
+  @apply list-disc pl-6 mb-4;
+}
+.rich-text ol {
+  @apply list-decimal pl-6 mb-4;
+}
+.rich-text li {
+  @apply mb-1;
+}
+.rich-text a {
+  @apply underline underline-offset-2 hover:text-primary;
+}

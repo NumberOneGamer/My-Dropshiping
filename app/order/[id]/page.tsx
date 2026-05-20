@@ -135,3 +135,5 @@ export default async function OrderPage({ params }: Props) {
     </div>
   );
 }
+
+export const runtime = 'edge';

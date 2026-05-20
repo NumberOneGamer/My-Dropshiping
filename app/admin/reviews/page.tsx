@@ -53,3 +53,5 @@ export default async function AdminReviewsPage() {
     </div>
   );
 }
+
+export const runtime = 'edge';

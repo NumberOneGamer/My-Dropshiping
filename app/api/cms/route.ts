@@ -38,3 +38,5 @@ export async function PUT(req: NextRequest) {
     return NextResponse.json({ error: "Failed to save CMS" }, { status: 500 });
   }
 }
+
+export const runtime = 'edge';

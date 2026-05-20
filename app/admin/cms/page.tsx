@@ -19,3 +19,5 @@ export default async function AdminCMSPage() {
     </div>
   );
 }
+
+export const runtime = 'edge';

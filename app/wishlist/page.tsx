@@ -85,3 +85,5 @@ export default function WishlistPage() {
     </div>
   );
 }
+
+export const runtime = 'edge';

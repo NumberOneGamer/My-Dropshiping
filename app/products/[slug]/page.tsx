@@ -38,3 +38,5 @@ export default async function ProductPage({ params }: Props) {
     <ProductDetail product={product as any} related={related as any} />
   );
 }
+
+export const runtime = 'edge';

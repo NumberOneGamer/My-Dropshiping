@@ -116,3 +116,5 @@ export default function AccountPage() {
     </div>
   );
 }
+
+export const runtime = 'edge';

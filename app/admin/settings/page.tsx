@@ -18,3 +18,5 @@ export default async function AdminSettingsPage() {
     </div>
   );
 }
+
+export const runtime = 'edge';

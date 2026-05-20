@@ -21,3 +21,5 @@ export default async function AdminOrdersPage() {
     </div>
   );
 }
+
+export const runtime = 'edge';

@@ -205,3 +205,5 @@ export default function CartPage() {
     </div>
   );
 }
+
+export const runtime = 'edge';

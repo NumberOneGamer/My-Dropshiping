@@ -22,3 +22,5 @@ export async function GET() {
   const settings = await prisma.siteSettings.findFirst();
   return NextResponse.json(settings || {});
 }
+
+export const runtime = 'edge';

@@ -67,3 +67,5 @@ export default async function AdminCouponsPage() {
     </div>
   );
 }
+
+export const runtime = 'edge';

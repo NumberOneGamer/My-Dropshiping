@@ -40,3 +40,5 @@ export async function GET() {
 
   return NextResponse.json(items);
 }
+
+export const runtime = 'edge';

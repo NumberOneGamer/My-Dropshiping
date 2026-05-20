@@ -21,3 +21,5 @@ export default async function AdminCategoriesPage() {
     </div>
   );
 }
+
+export const runtime = 'edge';

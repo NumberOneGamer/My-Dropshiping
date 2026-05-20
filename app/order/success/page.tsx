@@ -47,3 +47,5 @@ export default async function OrderSuccessPage({ searchParams }: Props) {
     </div>
   );
 }
+
+export const runtime = 'edge';

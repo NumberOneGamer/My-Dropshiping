@@ -269,3 +269,5 @@ export default function CheckoutPage() {
     </div>
   );
 }
+
+export const runtime = 'edge';

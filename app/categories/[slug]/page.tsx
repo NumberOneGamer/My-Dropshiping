@@ -43,3 +43,5 @@ export default async function CategoryPage({ params }: Props) {
     </div>
   );
 }
+
+export const runtime = 'edge';

@@ -31,7 +31,7 @@ export default async function AdminCouponsPage() {
             </tr>
           </thead>
           <tbody>
-            {coupons.map((coupon) => (
+            {coupons.map((coupon: any) => (
               <tr
                 key={coupon.id}
                 className="border-b border-border/50 last:border-0 hover:bg-secondary/30"

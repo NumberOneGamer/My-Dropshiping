@@ -1,8 +1,8 @@
 import { auth } from "@/lib/auth";
-import { prisma } from "@/lib/db/prisma";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { services } from "@/lib/services";
 
 export const metadata: Metadata = {
   title: "My Orders",
@@ -13,11 +13,7 @@ export default async function OrdersPage() {
   const session = await auth();
   if (!session?.user?.id) redirect("/auth/signin?callbackUrl=/account/orders");
 
-  const orders = await prisma.order.findMany({
-    where: { userId: session.user.id },
-    include: { items: { include: { product: { select: { name: true, images: true } } } } },
-    orderBy: { createdAt: "desc" },
-  });
+  const orders = await services.orders.getByUser(session.user.id);
 
   return (
     <div className="py-20 sm:py-28">
@@ -37,7 +33,7 @@ export default async function OrdersPage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs text-muted-foreground">Order #{order.orderNumber}</p>
-                    <p className="mt-1 text-sm font-medium">${order.total.toFixed(2)}</p>
+                    <p className="mt-1 text-sm font-medium">${Number(order.total).toFixed(2)}</p>
                   </div>
                   <span className="inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium capitalize">
                     {order.status}

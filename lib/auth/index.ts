@@ -2,7 +2,8 @@ import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 import Credentials from "next-auth/providers/credentials";
 import { compare } from "bcryptjs";
-import { prisma } from "@/lib/db/prisma";
+import { db, users } from "@/lib/db";
+import { eq } from "drizzle-orm";
 
 const secret = process.env.AUTH_SECRET || (typeof crypto !== "undefined" ? crypto.randomUUID?.() : "dev-secret-at-least-32-chars-long!!");
 
@@ -19,59 +20,33 @@ const config = { secret,
       },
       async authorize(credentials: any) {
         if (!credentials?.email || !credentials?.password) return null;
-
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.email as string },
-        });
-
-        if (!user || !user.password) return null;
-
-        const isValid = await compare(
-          credentials.password as string,
-          user.password
-        );
-
-        if (!isValid) return null;
-
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          image: user.image,
-          role: user.role,
-        };
+        try {
+          const [user] = await db.select().from(users).where(eq(users.email, credentials.email));
+          if (!user || !user.password) return null;
+          const isValid = await compare(credentials.password, user.password);
+          if (!isValid) return null;
+          return { id: user.id, email: user.email, name: user.name, image: user.image, role: user.role };
+        } catch { return null; }
       },
     }),
   ],
   callbacks: {
     async jwt({ token, user }: any) {
-      if (user) {
-        token.role = (user as any).role;
-        token.id = user.id;
-      }
+      if (user) { token.role = (user as any).role; token.id = user.id; }
       return token;
     },
     async session({ session, token }: any) {
-      if (session.user) {
-        (session.user as any).role = token.role;
-        (session.user as any).id = token.id;
-      }
+      if (session.user) { (session.user as any).role = token.role; (session.user as any).id = token.id; }
       return session;
     },
     async signIn({ user }: any) {
       if (user.email) {
-        const existing = await prisma.user.findUnique({
-          where: { email: user.email },
-        });
-        if (!existing) {
-          await prisma.user.create({
-            data: {
-              email: user.email,
-              name: user.name,
-              image: user.image,
-            },
-          });
-        }
+        try {
+          const [existing] = await db.select().from(users).where(eq(users.email, user.email));
+          if (!existing) {
+            await db.insert(users).values({ email: user.email, name: user.name, image: user.image });
+          }
+        } catch {}
       }
       return true;
     },

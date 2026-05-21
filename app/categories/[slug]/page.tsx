@@ -16,9 +16,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function CategoryPage({ params }: Props) {
   const { slug } = await params;
-  const products = await services.products.getAll({
-    limit: 50,
-  });
+  let products: any[] = [];
+  try {
+    products = await services.products.getAll({ limit: 50 });
+  } catch {} 
 
   const filtered = products.filter(
     (p: any) => p.category?.slug === slug || slug === "all"

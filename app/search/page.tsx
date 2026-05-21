@@ -7,9 +7,12 @@ interface Props {
 
 export default async function SearchPage({ searchParams }: Props) {
   const { q } = await searchParams;
-  const products = q
-    ? await services.products.getAll({ search: q, limit: 50 })
-    : await services.products.getAll({ limit: 50 });
+  let products: any[] = [];
+  try {
+    products = q
+      ? await services.products.getAll({ search: q, limit: 50 })
+      : await services.products.getAll({ limit: 50 });
+  } catch {} 
 
   return (
     <div className="py-16 sm:py-20">

@@ -25,9 +25,25 @@ const statusColors: Record<string, "default" | "secondary" | "destructive" | "ou
 
 export default async function OrderPage({ params }: Props) {
   const { id } = await params;
-  const order = await services.orders.getById(id);
-
-  if (!order) notFound();
+  let order: any = null;
+  let failed = false;
+  try {
+    order = await services.orders.getById(id);
+  } catch { failed = true; }
+  if (!order && !failed) notFound();
+  if (failed) {
+    return (
+      <div className="py-12">
+        <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 text-center">
+          <div className="mb-4 inline-flex items-center justify-center rounded-full bg-muted p-4">
+            <Package className="h-8 w-8 text-muted-foreground" />
+          </div>
+          <h1 className="text-2xl font-bold">Unable to load order</h1>
+          <p className="mt-2 text-muted-foreground">The database is currently unavailable. Please try again later.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="py-12">
@@ -58,7 +74,7 @@ export default async function OrderPage({ params }: Props) {
           <div className="rounded-xl border border-border/50 p-6">
             <h2 className="mb-4 font-semibold">Items</h2>
             <ul className="space-y-4">
-              {order.items.map((item) => (
+              {order.items.map((item: any) => (
                 <li
                   key={item.id}
                   className="flex items-center gap-4"

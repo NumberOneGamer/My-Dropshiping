@@ -22,8 +22,12 @@ export async function PUT(req: NextRequest) {
 }
 
 export async function GET() {
-  const settings = await prisma.siteSettings.findFirst();
-  return NextResponse.json(settings || {});
+  try {
+    const settings = await prisma.siteSettings.findFirst();
+    return NextResponse.json(settings || {});
+  } catch {
+    return NextResponse.json({ announcementText: "Free shipping on all orders over $50", announcementEnabled: true });
+  }
 }
 
 export const runtime = 'edge';

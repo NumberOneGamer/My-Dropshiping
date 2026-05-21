@@ -6,13 +6,19 @@ export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const section = searchParams.get("section");
 
-  const where = section ? { section } : {};
-  const contents = await prisma.cMSContent.findMany({
-    where,
-    orderBy: { section: "asc" },
-  });
-
-  return NextResponse.json(contents);
+  try {
+    const where = section ? { section } : {};
+    const contents = await prisma.cMSContent.findMany({
+      where,
+      orderBy: { section: "asc" },
+    });
+    return NextResponse.json(contents);
+  } catch {
+    if (section === "hero") {
+      return NextResponse.json([{ section: "hero", title: "Premium quality, delivered.", subtitle: "Curated essentials for modern living.", isActive: true }]);
+    }
+    return NextResponse.json([]);
+  }
 }
 
 export async function PUT(req: NextRequest) {

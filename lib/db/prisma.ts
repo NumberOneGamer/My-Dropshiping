@@ -7,16 +7,29 @@ let prismaClient: PrismaClient;
 try {
   prismaClient = new PrismaClient({ log: process.env.NODE_ENV === "development" ? ["query"] : [] });
 } catch {
+  const modelHandler: Record<string, (...args: any[]) => any> = {
+    findMany: async () => [],
+    findFirst: async () => null,
+    findUnique: async () => null,
+    create: async (args: any) => args?.data || {},
+    update: async (args: any) => args?.data || {},
+    delete: async () => ({}),
+    upsert: async (args: any) => args?.create || {},
+    count: async () => 0,
+    aggregate: async () => ({ _avg: {}, _count: {}, _max: {}, _min: {}, _sum: { total: "0" } }),
+    groupBy: async () => [],
+    findRaw: async () => [],
+    aggregateRaw: async () => [],
+  };
   prismaClient = new Proxy({} as PrismaClient, {
     get(_target, _prop) {
-      const noop = async () => [] as any;
-      const noopSingle = async () => null as any;
+      if (typeof _prop !== "string") return undefined;
       return new Proxy({} as any, {
         get(_t, method) {
-          if (method === "findMany" || method === "findMany" || method === "findFirst") return noop;
-          if (method === "findUnique" || method === "findFirst") return noopSingle;
-          if (method === "create" || method === "update" || method === "delete" || method === "upsert" || method === "count" || method === "aggregate") return noop;
-          return noop;
+          if (typeof method === "string" && modelHandler[method]) {
+            return modelHandler[method];
+          }
+          return async () => [];
         },
       });
     },

@@ -13,8 +13,8 @@
     "db:migrate": "prisma migrate dev",
     "db:seed": "tsx prisma/seed.ts",
     "db:studio": "prisma studio",
-    "pages:build": "npx @cloudflare/next-on-pages",
-    "pages:preview": "npm run pages:build && wrangler pages dev",
+    "pages:build": "npx opennextjs-cloudflare build",
+    "pages:preview": "npm run pages:build && wrangler dev",
     "pages:deploy": "npm run pages:build && wrangler pages deploy"
   },
   "dependencies": {
@@ -45,6 +45,7 @@
     "@radix-ui/react-visually-hidden": "^1.1.0",
     "@tanstack/react-table": "^8.20.0",
     "@uploadthing/react": "^7.0.0",
+    "@upstash/redis": "^1.38.0",
     "bcryptjs": "^2.4.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -71,7 +72,7 @@
     "zustand": "^5.0.0"
   },
   "devDependencies": {
-    "@cloudflare/next-on-pages": "^1.13.0",
+    "@opennextjs/cloudflare": "^1.19.0",
     "@tailwindcss/typography": "^0.5.15",
     "@types/bcryptjs": "^2.4.6",
     "@types/node": "^22.0.0",
@@ -79,6 +80,7 @@
     "@types/react-dom": "^19.0.0-rc.0",
     "autoprefixer": "^10.4.20",
     "drizzle-kit": "^0.31.10",
+    "esbuild": "^0.28.0",
     "eslint": "^9.0.0",
     "eslint-config-next": "^15.0.0",
     "postcss": "^8.4.47",
@@ -89,6 +91,6 @@
     "tsx": "^4.19.0",
     "typescript": "^5.6.0",
     "vercel": "^37.0.0",
-    "wrangler": "^3.80.0"
+    "wrangler": "^4.93.1"
   }
 }

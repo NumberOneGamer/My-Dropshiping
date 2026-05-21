@@ -1,4 +1,4 @@
-import { SupplierProduct, SupplierOrderInput, SupplierOrderResult, SupplierTrackingInfo, ImportResult, SyncResult } from "./types";
+import { SupplierOrderInput, SupplierOrderResult, SupplierTrackingInfo, ImportResult, SyncResult } from "./types";
 
 export abstract class BaseSupplierAdapter {
   abstract readonly supplier: string;
@@ -11,16 +11,40 @@ export abstract class BaseSupplierAdapter {
   abstract getTracking(supplierOrderId: string): Promise<SupplierTrackingInfo>;
   abstract validateUrl(url: string): boolean;
 
-  protected async fetch(url: string, options?: RequestInit): Promise<Response> {
-    const res = await fetch(url, {
-      ...options,
-      headers: { "User-Agent": "KAIRO-Dropship/1.0", ...options?.headers },
-    });
-    if (!res.ok) throw new Error(`Supplier API error: ${res.status} ${res.statusText}`);
-    return res;
+  get displayName(): string {
+    return this.name;
   }
 
-  protected log(type: string, action: string, status: string, message: string, metadata?: Record<string, any>): void {
-    // optional hook for logging
+  get isConfigured(): boolean {
+    return false;
+  }
+
+  protected async fetch(url: string, options?: RequestInit): Promise<Response> {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 30000);
+
+    try {
+      const res = await fetch(url, {
+        ...options,
+        signal: controller.signal,
+        headers: {
+          "User-Agent": "KAIRO-Dropship/1.0",
+          ...options?.headers,
+        },
+      });
+      if (!res.ok) throw new Error(`Supplier API error: ${res.status} ${res.statusText}`);
+      return res;
+    } finally {
+      clearTimeout(timeout);
+    }
+  }
+
+  protected requireCredentials(): void {
+    if (!this.isConfigured) {
+      throw new Error(
+        `${this.name} is not configured. Set the required environment variables ` +
+        `in your Cloudflare Dashboard or .env.local file. Currently using mock data.`
+      );
+    }
   }
 }

@@ -5,6 +5,8 @@ import { auth } from "@/lib/auth";
 import { couponSchema } from "@/lib/validations";
 
 export async function GET(req: NextRequest) {
+  const session = await auth();
+  if (session?.user?.role !== "ADMIN") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { searchParams } = new URL(req.url);
   const code = searchParams.get("code");
   if (code) {

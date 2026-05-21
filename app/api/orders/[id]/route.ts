@@ -4,9 +4,16 @@ import { eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const session = await auth();
   const { id } = await params;
   const [order] = await db.select().from(orders).where(eq(orders.id, id)).limit(1);
   if (!order) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  const userId = (session?.user as any)?.id;
+  const isAdmin = (session?.user as any)?.role === "ADMIN";
+  const isOwner = userId && order.userId === userId;
+  if (!session?.user || !(isAdmin || isOwner)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
   const items = await db
     .select()

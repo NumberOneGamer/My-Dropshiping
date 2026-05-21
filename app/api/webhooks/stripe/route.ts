@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db, orders } from "@/lib/db";
 import { eq } from "drizzle-orm";
 import { constructStripeWebhook } from "@/lib/stripe";
+import { autoFulfillOrder } from "@/lib/fulfillment";
 
 async function handleCheckoutCompleted(session: any) {
   const orderNumber = session.metadata?.order_number;
@@ -16,6 +17,11 @@ async function handleCheckoutCompleted(session: any) {
     paymentStatus: "PAID",
     stripePaymentId: session.payment_intent as string,
   }).where(eq(orders.orderNumber, orderNumber));
+
+  // Trigger auto-fulfillment after payment confirmed
+  autoFulfillOrder({ orderId: existing.id }).catch((err) =>
+    console.error(`[Fulfillment] Auto-fulfill failed for order ${existing.id}:`, err)
+  );
 }
 
 async function handleCheckoutExpired(session: any) {

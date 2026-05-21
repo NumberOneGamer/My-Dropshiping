@@ -15,6 +15,10 @@ import {
   Settings,
   LogOut,
   ChevronLeft,
+  Import,
+  Truck,
+  RefreshCw,
+  Store,
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 
@@ -27,6 +31,10 @@ const sidebarItems = [
   { name: "Customers", href: "/admin/customers", icon: Users },
   { name: "Reviews", href: "/admin/reviews", icon: Star },
   { name: "CMS", href: "/admin/cms", icon: FileText },
+  { name: "Import", href: "/admin/import", icon: Import },
+  { name: "Suppliers", href: "/admin/suppliers", icon: Store },
+  { name: "Fulfillment", href: "/admin/fulfillment", icon: Truck },
+  { name: "Sync", href: "/admin/sync", icon: RefreshCw },
   { name: "Settings", href: "/admin/settings", icon: Settings },
 ];
 

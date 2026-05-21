@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db, reviews } from "@/lib/db";
 import { auth } from "@/lib/auth";
+import { reviewSchema } from "@/lib/validations";
 
 export async function POST(req: NextRequest) {
   const session = await auth();
@@ -9,10 +10,17 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { productId, rating, comment } = await req.json();
+    const body = await req.json();
+    const data = reviewSchema.parse(body);
     const userId = (session.user as any).id;
 
-    const [review] = await db.insert(reviews).values({ productId, userId, rating, comment, title: "" }).returning();
+    const [review] = await db.insert(reviews).values({
+      productId: data.productId,
+      userId,
+      rating: data.rating,
+      title: data.title || "",
+      comment: data.comment,
+    }).returning();
 
     return NextResponse.json(review);
   } catch {

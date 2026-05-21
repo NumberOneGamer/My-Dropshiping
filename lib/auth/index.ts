@@ -5,7 +5,7 @@ import { compare } from "bcryptjs";
 import { db, users } from "@/lib/db";
 import { eq } from "drizzle-orm";
 
-const secret = process.env.AUTH_SECRET || (typeof crypto !== "undefined" ? crypto.randomUUID?.() : "dev-secret-at-least-32-chars-long!!");
+const secret = process.env.AUTH_SECRET;
 
 const config = { secret,
   providers: [

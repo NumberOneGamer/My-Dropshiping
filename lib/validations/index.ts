@@ -55,6 +55,7 @@ export const couponSchema = z.object({
 });
 
 export const reviewSchema = z.object({
+  productId: z.string().min(1, "Product is required"),
   rating: z.coerce.number().min(1).max(5),
   title: z.string().optional(),
   comment: z.string().min(10, "Review must be at least 10 characters"),

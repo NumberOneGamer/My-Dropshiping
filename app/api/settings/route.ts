@@ -2,12 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { db, siteSettings } from "@/lib/db";
 import { eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
+import { settingsSchema } from "@/lib/validations";
 
 export async function PUT(req: NextRequest) {
   const session = await auth();
   if (session?.user?.role !== "ADMIN") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   try {
-    const settings = await req.json();
+    const body = await req.json();
+    const settings = settingsSchema.parse(body);
     const existingRows = await db.select().from(siteSettings).where(eq(siteSettings.id, "default")).limit(1);
     const existing = existingRows[0] || null;
 

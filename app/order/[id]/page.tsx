@@ -2,9 +2,10 @@ import { notFound } from "next/navigation";
 import { services } from "@/lib/services";
 import { Badge } from "@/components/ui/badge";
 import { formatPrice } from "@/lib/utils/cn";
+import { getTrackingForOrder } from "@/lib/tracking";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Package } from "lucide-react";
+import { ArrowLeft, Package, Truck, ExternalLink } from "lucide-react";
 import type { Metadata } from "next";
 
 interface Props {
@@ -26,9 +27,11 @@ const statusColors: Record<string, "default" | "secondary" | "destructive" | "ou
 export default async function OrderPage({ params }: Props) {
   const { id } = await params;
   let order: any = null;
+  let tracking: any[] = [];
   let failed = false;
   try {
     order = await services.orders.getById(id);
+    tracking = await getTrackingForOrder(id);
   } catch { failed = true; }
   if (!order && !failed) notFound();
   if (failed) {
@@ -101,6 +104,44 @@ export default async function OrderPage({ params }: Props) {
               ))}
             </ul>
           </div>
+
+          {tracking.length > 0 && (
+            <div className="rounded-xl border border-border/50 p-6">
+              <div className="mb-4 flex items-center gap-2">
+                <Truck className="h-5 w-5 text-emerald-500" />
+                <h2 className="font-semibold">Tracking</h2>
+              </div>
+              {tracking.map((t: any) => (
+                <div key={t.fulfillmentJobId} className="space-y-3">
+                  <div className="flex items-center gap-2 text-sm">
+                    {t.carrier && <span className="text-muted-foreground">{t.carrier}</span>}
+                    {t.trackingNumber && (
+                      <span className="font-mono text-xs">{t.trackingNumber}</span>
+                    )}
+                    {t.trackingUrl && (
+                      <a href={t.trackingUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs text-primary hover:underline">
+                        Track <ExternalLink className="h-3 w-3" />
+                      </a>
+                    )}
+                  </div>
+                  {t.updates && t.updates.length > 0 && (
+                    <div className="relative ml-2 space-y-3 border-l-2 border-border/40 pl-4">
+                      {t.updates.map((update: any, i: number) => (
+                        <div key={i} className="relative">
+                          <div className="absolute -left-[19px] top-1 h-3 w-3 rounded-full border-2 border-emerald-500 bg-background" />
+                          <p className="text-sm font-medium">{update.description}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {update.location && `${update.location} — `}
+                            {new Date(update.timestamp).toLocaleString()}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
 
           <div className="rounded-xl border border-border/50 p-6">
             <h2 className="mb-4 font-semibold">Order Summary</h2>

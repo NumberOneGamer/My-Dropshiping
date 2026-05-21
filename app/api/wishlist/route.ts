@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db, wishlistItems, products } from "@/lib/db";
 import { eq, and } from "drizzle-orm";
+import { auth } from "@/lib/auth";
 
 export async function POST(req: NextRequest) {
   try {
     const { productId } = await req.json();
-    const session = await import("@/lib/auth").then((m) => m.auth());
+    const session = await auth();
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -30,7 +31,7 @@ export async function POST(req: NextRequest) {
 }
 
 export async function GET() {
-  const session = await import("@/lib/auth").then((m) => m.auth());
+  const session = await auth();
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }

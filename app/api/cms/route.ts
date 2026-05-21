@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db, cmsContents } from "@/lib/db";
 import { eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
+import { cmsSectionSchema } from "@/lib/validations";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -26,7 +27,9 @@ export async function PUT(req: NextRequest) {
   const session = await auth();
   if (session?.user?.role !== "ADMIN") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   try {
-    const { section, title, subtitle, content, isActive } = await req.json();
+    const body = await req.json();
+    const data = cmsSectionSchema.parse(body);
+    const { section, title, subtitle, content, isActive } = data;
 
     const existingRows = await db.select().from(cmsContents).where(eq(cmsContents.section, section)).limit(1);
     const existing = existingRows[0] || null;

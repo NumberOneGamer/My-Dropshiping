@@ -257,3 +257,144 @@ export const siteSettings = pgTable("site_settings", {
   seoDefaults: jsonb("seo_defaults"),
   updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow().notNull(),
 });
+
+export const supplierProducts = pgTable("supplier_products", {
+  id: text("id").primaryKey().default(sql`gen_random_uuid()`),
+  supplier: text("supplier").notNull(),
+  supplierProductId: text("supplier_product_id").notNull(),
+  supplierUrl: text("supplier_url"),
+  title: text("title").notNull(),
+  description: text("description"),
+  images: text("images").array().default(sql`'{}'`),
+  price: decimal("price", { precision: 10, scale: 2 }),
+  comparePrice: decimal("compare_price", { precision: 10, scale: 2 }),
+  costPrice: decimal("cost_price", { precision: 10, scale: 2 }),
+  currency: text("currency").default("USD"),
+  variants: jsonb("variants"),
+  categoryId: text("category_id").references(() => categories.id),
+  tags: text("tags").array().default(sql`'{}'`),
+  weight: decimal("weight", { precision: 8, scale: 2 }),
+  sku: text("sku"),
+  stock: integer("stock").default(0),
+  attributes: jsonb("attributes"),
+  mappedProductId: text("mapped_product_id").references(() => products.id),
+  status: text("status").default("PENDING"),
+  error: text("error"),
+  rawData: jsonb("raw_data"),
+  createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow().notNull(),
+}, (table) => [
+  index().on(table.supplier),
+  index().on(table.status),
+  uniqueIndex().on(table.supplierProductId, table.supplier),
+  index().on(table.mappedProductId),
+]);
+
+export const supplierMappings = pgTable("supplier_mappings", {
+  id: text("id").primaryKey().default(sql`gen_random_uuid()`),
+  productId: text("product_id").notNull().references(() => products.id, { onDelete: "cascade" }),
+  supplierProductId: text("supplier_product_id").notNull(),
+  supplier: text("supplier").notNull(),
+  supplierUrl: text("supplier_url"),
+  variantMapping: jsonb("variant_mapping"),
+  costPrice: decimal("cost_price", { precision: 10, scale: 2 }),
+  supplierSku: text("supplier_sku"),
+  isActive: boolean("is_active").default(true).notNull(),
+  lastSyncedAt: timestamp("last_synced_at", { mode: "date" }),
+  createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow().notNull(),
+}, (table) => [
+  index().on(table.productId),
+  uniqueIndex().on(table.supplier, table.supplierProductId),
+  index().on(table.isActive),
+]);
+
+export const syncJobs = pgTable("sync_jobs", {
+  id: text("id").primaryKey().default(sql`gen_random_uuid()`),
+  type: text("type").notNull(),
+  status: text("status").default("PENDING"),
+  supplier: text("supplier"),
+  totalItems: integer("total_items").default(0),
+  processedItems: integer("processed_items").default(0),
+  failedItems: integer("failed_items").default(0),
+  result: jsonb("result"),
+  error: text("error"),
+  startedAt: timestamp("started_at", { mode: "date" }),
+  completedAt: timestamp("completed_at", { mode: "date" }),
+  createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow().notNull(),
+}, (table) => [
+  index().on(table.type),
+  index().on(table.status),
+  index().on(table.createdAt),
+]);
+
+export const fulfillmentJobs = pgTable("fulfillment_jobs", {
+  id: text("id").primaryKey().default(sql`gen_random_uuid()`),
+  orderId: text("order_id").notNull().references(() => orders.id, { onDelete: "cascade" }),
+  orderItemId: text("order_item_id").references(() => orderItems.id),
+  supplier: text("supplier").notNull(),
+  supplierOrderId: text("supplier_order_id"),
+  status: text("status").default("PENDING"),
+  trackingNumber: text("tracking_number"),
+  trackingUrl: text("tracking_url"),
+  carrier: text("carrier"),
+  cost: decimal("cost", { precision: 10, scale: 2 }),
+  currency: text("currency").default("USD"),
+  shippingMethod: text("shipping_method"),
+  estimatedDelivery: timestamp("estimated_delivery", { mode: "date" }),
+  shippedAt: timestamp("shipped_at", { mode: "date" }),
+  deliveredAt: timestamp("delivered_at", { mode: "date" }),
+  error: text("error"),
+  rawResponse: jsonb("raw_response"),
+  retryCount: integer("retry_count").default(0),
+  maxRetries: integer("max_retries").default(3),
+  lastRetryAt: timestamp("last_retry_at", { mode: "date" }),
+  createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow().notNull(),
+}, (table) => [
+  index().on(table.orderId),
+  index().on(table.supplierOrderId),
+  index().on(table.status),
+  index().on(table.supplier, table.status),
+]);
+
+export const trackingUpdates = pgTable("tracking_updates", {
+  id: text("id").primaryKey().default(sql`gen_random_uuid()`),
+  fulfillmentJobId: text("fulfillment_job_id").notNull().references(() => fulfillmentJobs.id, { onDelete: "cascade" }),
+  status: text("status").notNull(),
+  location: text("location"),
+  description: text("description").notNull(),
+  timestamp: timestamp("timestamp", { mode: "date" }).defaultNow().notNull(),
+  rawData: jsonb("raw_data"),
+  createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+}, (table) => [
+  index().on(table.fulfillmentJobId),
+  index().on(table.timestamp),
+]);
+
+export const contactMessages = pgTable("contact_messages", {
+  id: text("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  email: text("email").notNull(),
+  subject: text("subject").notNull(),
+  message: text("message").notNull(),
+  isRead: boolean("is_read").default(false).notNull(),
+  createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+}, (table) => [index().on(table.createdAt)]);
+
+export const automationLogs = pgTable("automation_logs", {
+  id: text("id").primaryKey().default(sql`gen_random_uuid()`),
+  type: text("type").notNull(),
+  action: text("action").notNull(),
+  status: text("status").default("SUCCESS"),
+  message: text("message"),
+  metadata: jsonb("metadata"),
+  duration: integer("duration"),
+  createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+}, (table) => [
+  index().on(table.type),
+  index().on(table.status),
+  index().on(table.createdAt),
+  index().on(table.type, table.status),
+]);

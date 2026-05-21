@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db/prisma";
+import { db, orders, products, users } from "@/lib/db";
+import { eq, count, sql } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 
 export async function GET() {
@@ -8,28 +9,28 @@ export async function GET() {
   try {
     const [totalOrders, totalRevenue, totalProducts, totalCustomers] =
       await Promise.all([
-        prisma.order.count(),
-        prisma.order.aggregate({ _sum: { total: true } }),
-        prisma.product.count({ where: { status: "PUBLISHED" } }),
-        prisma.user.count(),
+        db.select({ value: count() }).from(orders).then((r) => Number(r[0].value)),
+        db.select({ value: sql`COALESCE(SUM(${orders.total}), 0)` }).from(orders).then((r) => Number(r[0].value)),
+        db.select({ value: count() }).from(products).where(eq(products.status, "PUBLISHED")).then((r) => Number(r[0].value)),
+        db.select({ value: count() }).from(users).then((r) => Number(r[0].value)),
       ]);
 
-    const recentOrders = await prisma.order.findMany({
-      take: 5,
-      orderBy: { createdAt: "desc" },
-      select: {
-        id: true,
-        orderNumber: true,
-        total: true,
-        status: true,
-        createdAt: true,
-        email: true,
-      },
-    });
+    const recentOrders = await db
+      .select({
+        id: orders.id,
+        orderNumber: orders.orderNumber,
+        total: orders.total,
+        status: orders.status,
+        createdAt: orders.createdAt,
+        email: orders.email,
+      })
+      .from(orders)
+      .orderBy(sql`${orders.createdAt} DESC`)
+      .limit(5);
 
     return NextResponse.json({
       totalOrders,
-      totalRevenue: totalRevenue._sum.total || 0,
+      totalRevenue,
       totalProducts,
       totalCustomers,
       recentOrders,

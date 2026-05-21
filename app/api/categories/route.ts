@@ -1,14 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db/prisma";
+import { db, categories, products } from "@/lib/db";
+import { eq, asc, count } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { categorySchema } from "@/lib/validations";
 
 export async function GET() {
-  const categories = await prisma.category.findMany({
-    orderBy: { order: "asc" },
-    include: { _count: { select: { products: true } } },
-  });
-  return NextResponse.json(categories);
+  const categoriesList = await db.select().from(categories).orderBy(asc(categories.order));
+  const counts = await db.select({
+    categoryId: products.categoryId,
+    count: count(),
+  })
+    .from(products)
+    .groupBy(products.categoryId);
+  const countMap = new Map(counts.map(c => [c.categoryId, Number(c.count)]));
+  const result = categoriesList.map(c => ({
+    ...c,
+    _count: { products: countMap.get(c.id) ?? 0 },
+  }));
+  return NextResponse.json(result);
 }
 
 export async function POST(req: NextRequest) {
@@ -18,7 +27,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const data = categorySchema.parse(body);
 
-    const category = await prisma.category.create({ data });
+    const [category] = await db.insert(categories).values(data).returning();
     return NextResponse.json(category, { status: 201 });
   } catch {
     return NextResponse.json(

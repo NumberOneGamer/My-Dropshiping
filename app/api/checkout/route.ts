@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db/prisma";
+import { db, products, orders, orderItems, coupons } from "@/lib/db";
+import { eq, inArray } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { generateOrderNumber } from "@/lib/utils/cn";
 import { createCheckoutSession } from "@/lib/stripe";
@@ -16,11 +17,14 @@ export async function POST(req: NextRequest) {
     if (!rawItems?.length) return NextResponse.json({ error: "Cart is empty" }, { status: 400 });
 
     const productIds = rawItems.map((i) => i.productId);
-    const products = await prisma.product.findMany({
-      where: { id: { in: productIds }, isActive: true, status: "PUBLISHED" },
-    });
+    const productRows = await db.select().from(products).where(inArray(products.id, productIds));
 
-    const productMap = new Map(products.map((p) => [p.id, p]));
+    const activeProducts = productRows.filter((p) => p.isActive && p.status === "PUBLISHED");
+    if (activeProducts.length !== productIds.length) {
+      return NextResponse.json({ error: "Some products are unavailable" }, { status: 400 });
+    }
+
+    const productMap = new Map(activeProducts.map((p) => [p.id, p]));
     let subtotal = 0;
     for (const item of rawItems) {
       const product = productMap.get(item.productId);
@@ -32,7 +36,8 @@ export async function POST(req: NextRequest) {
     let discount = 0;
     let couponRecord = null;
     if (couponCode) {
-      couponRecord = await prisma.coupon.findUnique({ where: { code: couponCode } });
+      const couponRows = await db.select().from(coupons).where(eq(coupons.code, couponCode)).limit(1);
+      couponRecord = couponRows[0] || null;
       if (!couponRecord || (couponRecord.expiresAt && couponRecord.expiresAt < new Date()) || (couponRecord.usageLimit && couponRecord.usedCount >= couponRecord.usageLimit)) {
         return NextResponse.json({ error: "Invalid or expired coupon" }, { status: 400 });
       }
@@ -47,44 +52,39 @@ export async function POST(req: NextRequest) {
 
     const orderNumber = generateOrderNumber();
 
-    const order = await prisma.$transaction(async (tx) => {
-      const o = await tx.order.create({
-        data: {
-          orderNumber,
-          userId: (session?.user as any)?.id,
-          email,
-          subtotal,
-          shippingCost: shipping,
-          discount,
-          total,
-          couponId: couponRecord?.id,
-          shippingAddress: { firstName, lastName, line1, line2, city, state, zip, country },
-          notes,
-          items: {
-            create: rawItems.map((item) => {
-              const product = productMap.get(item.productId)!;
-              return {
-                productId: item.productId,
-                name: product.name,
-                image: product.images?.[0] ?? "",
-                price: Number(product.price),
-                quantity: item.quantity,
-                total: Number(product.price) * item.quantity,
-              };
-            }),
-          },
-        },
-      });
+    const [order] = await db.insert(orders).values({
+      orderNumber,
+      userId: (session?.user as any)?.id,
+      email,
+      subtotal: String(subtotal),
+      shippingCost: String(shipping),
+      discount: String(discount),
+      total: String(total),
+      couponId: couponRecord?.id,
+      shippingAddress: { firstName, lastName, line1, line2, city, state, zip, country },
+      notes,
+    }).returning();
 
-      if (couponRecord) {
-        await tx.coupon.update({
-          where: { id: couponRecord.id },
-          data: { usedCount: { increment: 1 } },
-        });
-      }
+    if (!order) throw new Error("Failed to create order");
 
-      return o;
+    const itemValues = rawItems.map((item) => {
+      const product = productMap.get(item.productId)!;
+      return {
+        orderId: order.id,
+        productId: item.productId,
+        name: product.name,
+        image: product.images?.[0] ?? "",
+        price: String(Number(product.price)),
+        quantity: item.quantity,
+        total: String(Number(product.price) * item.quantity),
+      };
     });
+
+    await db.insert(orderItems).values(itemValues);
+
+    if (couponRecord) {
+      await db.update(coupons).set({ usedCount: (couponRecord.usedCount || 0) + 1 }).where(eq(coupons.id, couponRecord.id));
+    }
 
     const stripeSession = await createCheckoutSession({
       items: rawItems.map((item) => {
@@ -103,10 +103,7 @@ export async function POST(req: NextRequest) {
       cancelUrl: `${process.env.NEXT_PUBLIC_APP_URL}/checkout?canceled=true`,
     });
 
-    await prisma.order.update({
-      where: { id: order.id },
-      data: { stripeSessionId: stripeSession.id },
-    });
+    await db.update(orders).set({ stripeSessionId: stripeSession.id }).where(eq(orders.id, order.id));
 
     return NextResponse.json({ url: stripeSession.url });
   } catch (error: any) {

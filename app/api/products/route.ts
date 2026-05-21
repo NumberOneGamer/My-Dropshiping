@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db/prisma";
+import { db, products as productsTable } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { services } from "@/lib/services";
 import { productSchema } from "@/lib/validations";
@@ -29,7 +29,13 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const data = productSchema.parse(body);
-    const product = await prisma.product.create({ data });
+    const [product] = await db.insert(productsTable).values({
+      ...data,
+      price: String(data.price),
+      comparePrice: data.comparePrice != null ? String(data.comparePrice) : null,
+      costPrice: data.costPrice != null ? String(data.costPrice) : null,
+      weight: data.weight != null ? String(data.weight) : null,
+    }).returning();
     return NextResponse.json(product, { status: 201 });
   } catch {
     return NextResponse.json({ error: "Failed to create product" }, { status: 400 });

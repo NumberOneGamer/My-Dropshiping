@@ -1,13 +1,38 @@
-import { prisma } from "@/lib/db/prisma";
+import { db, orders as ordersTable, orderItems, users } from "@/lib/db";
 import { AdminOrdersTable } from "@/components/admin/orders-table";
 import { requireAdmin } from "@/lib/auth/session";
+import { desc, inArray } from "drizzle-orm";
 
 export default async function AdminOrdersPage() {
   await requireAdmin();
-  const orders = await prisma.order.findMany({
-    orderBy: { createdAt: "desc" },
-    include: { items: true, user: { select: { name: true, email: true } } },
-  });
+
+  let orders: any[] = [];
+  try {
+    const ordersData = await db.select().from(ordersTable).orderBy(desc(ordersTable.createdAt));
+    const orderIds = ordersData.map(o => o.id);
+
+    const items = orderIds.length > 0
+      ? await db.select().from(orderItems).where(inArray(orderItems.orderId, orderIds))
+      : [];
+
+    const userIds = [...new Set(ordersData.filter(o => o.userId).map(o => o.userId!))];
+    const usersData = userIds.length > 0
+      ? await db.select({ id: users.id, name: users.name, email: users.email }).from(users).where(inArray(users.id, userIds))
+      : [];
+
+    const userMap = new Map(usersData.map(u => [u.id, u]));
+    const itemsByOrderId = new Map<string, typeof items>();
+    for (const item of items) {
+      if (!itemsByOrderId.has(item.orderId)) itemsByOrderId.set(item.orderId, []);
+      itemsByOrderId.get(item.orderId)!.push(item);
+    }
+
+    orders = ordersData.map(o => ({
+      ...o,
+      user: o.userId ? userMap.get(o.userId) ?? null : null,
+      items: itemsByOrderId.get(o.id) ?? [],
+    }));
+  } catch {}
 
   return (
     <div className="space-y-6">

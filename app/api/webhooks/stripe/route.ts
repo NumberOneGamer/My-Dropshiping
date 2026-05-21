@@ -1,43 +1,38 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db/prisma";
+import { db, orders } from "@/lib/db";
+import { eq } from "drizzle-orm";
 import { constructStripeWebhook } from "@/lib/stripe";
 
 async function handleCheckoutCompleted(session: any) {
   const orderNumber = session.metadata?.order_number;
   if (!orderNumber) return;
 
-  const existing = await prisma.order.findUnique({ where: { orderNumber } });
+  const existingRows = await db.select().from(orders).where(eq(orders.orderNumber, orderNumber)).limit(1);
+  const existing = existingRows[0] || null;
   if (!existing || existing.paymentStatus === "PAID") return;
 
-  await prisma.order.update({
-    where: { orderNumber },
-    data: {
-      status: "PROCESSING",
-      paymentStatus: "PAID",
-      stripePaymentId: session.payment_intent as string,
-    },
-  });
+  await db.update(orders).set({
+    status: "PROCESSING",
+    paymentStatus: "PAID",
+    stripePaymentId: session.payment_intent as string,
+  }).where(eq(orders.orderNumber, orderNumber));
 }
 
 async function handleCheckoutExpired(session: any) {
   const orderNumber = session.metadata?.order_number;
   if (!orderNumber) return;
 
-  await prisma.order.update({
-    where: { orderNumber, paymentStatus: { not: "PAID" } },
-    data: { status: "CANCELLED", paymentStatus: "FAILED" },
-  });
+  await db.update(orders).set({ status: "CANCELLED", paymentStatus: "FAILED" })
+    .where(eq(orders.orderNumber, orderNumber));
 }
 
 async function handlePaymentFailed(paymentIntent: any) {
   const sessionId = paymentIntent.id;
-  const order = await prisma.order.findFirst({ where: { stripePaymentId: sessionId } });
+  const orderRows = await db.select().from(orders).where(eq(orders.stripePaymentId, sessionId)).limit(1);
+  const order = orderRows[0] || null;
   if (!order) return;
 
-  await prisma.order.update({
-    where: { id: order.id },
-    data: { paymentStatus: "FAILED" },
-  });
+  await db.update(orders).set({ paymentStatus: "FAILED" }).where(eq(orders.id, order.id));
 }
 
 export async function POST(req: NextRequest) {

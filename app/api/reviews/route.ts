@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db/prisma";
+import { db, reviews } from "@/lib/db";
 import { auth } from "@/lib/auth";
 
 export async function POST(req: NextRequest) {
@@ -12,15 +12,7 @@ export async function POST(req: NextRequest) {
     const { productId, rating, comment } = await req.json();
     const userId = (session.user as any).id;
 
-    const review = await prisma.review.create({
-      data: {
-        productId,
-        userId,
-        rating,
-        comment,
-        title: "",
-      },
-    });
+    const [review] = await db.insert(reviews).values({ productId, userId, rating, comment, title: "" }).returning();
 
     return NextResponse.json(review);
   } catch {

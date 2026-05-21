@@ -1,16 +1,32 @@
-import { prisma } from "@/lib/db/prisma";
+import { db, reviews as reviewsTable, users, products } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth/session";
 import { ReviewList } from "@/components/product/review-list";
+import { desc, inArray } from "drizzle-orm";
 
 export default async function AdminReviewsPage() {
   await requireAdmin();
-  const reviews = await prisma.review.findMany({
-    orderBy: { createdAt: "desc" },
-    include: {
-      user: { select: { name: true, image: true } },
-      product: { select: { name: true, slug: true } },
-    },
-  });
+
+  let reviews: any[] = [];
+  try {
+    const reviewsData = await db.select().from(reviewsTable).orderBy(desc(reviewsTable.createdAt));
+
+    const userIds = [...new Set(reviewsData.map(r => r.userId))];
+    const productIds = [...new Set(reviewsData.map(r => r.productId))];
+
+    const usersData = await db.select({ id: users.id, name: users.name, image: users.image })
+      .from(users).where(inArray(users.id, userIds));
+    const productsData = await db.select({ id: products.id, name: products.name, slug: products.slug })
+      .from(products).where(inArray(products.id, productIds));
+
+    const userMap = new Map(usersData.map(u => [u.id, u]));
+    const productMap = new Map(productsData.map(p => [p.id, p]));
+
+    reviews = reviewsData.map(r => ({
+      ...r,
+      user: userMap.get(r.userId) ?? { name: "Anonymous", image: null },
+      product: productMap.get(r.productId) ?? { name: "Unknown", slug: "" },
+    }));
+  } catch {}
 
   return (
     <div className="space-y-6">

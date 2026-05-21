@@ -1,10 +1,15 @@
-import { prisma } from "@/lib/db/prisma";
+import { db, siteSettings } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth/session";
 import { AdminSettings } from "@/components/admin/settings-form";
 
 export default async function AdminSettingsPage() {
   await requireAdmin();
-  const settings = await prisma.siteSettings.findFirst();
+
+  let settings: any = null;
+  try {
+    const result = await db.select().from(siteSettings).limit(1);
+    settings = result[0] ?? null;
+  } catch {}
 
   return (
     <div className="space-y-6">

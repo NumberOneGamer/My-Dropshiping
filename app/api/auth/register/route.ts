@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db/prisma";
+import { db, users } from "@/lib/db";
+import { eq } from "drizzle-orm";
 import { hash } from "bcryptjs";
 import { registerSchema } from "@/lib/validations";
 import { rateLimit } from "@/lib/rate-limit";
@@ -12,13 +13,13 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { name, email, password } = registerSchema.parse(body);
 
-    const existing = await prisma.user.findUnique({ where: { email } });
+    const [existing] = await db.select().from(users).where(eq(users.email, email)).limit(1);
     if (existing) {
       return NextResponse.json({ error: "Email already registered" }, { status: 409 });
     }
 
     const hashedPassword = await hash(password, 12);
-    await prisma.user.create({ data: { name, email, password: hashedPassword } });
+    await db.insert(users).values({ name, email, password: hashedPassword });
 
     return NextResponse.json({ success: true });
   } catch {

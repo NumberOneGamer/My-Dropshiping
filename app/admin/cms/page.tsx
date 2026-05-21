@@ -1,11 +1,17 @@
-import { prisma } from "@/lib/db/prisma";
+import { db, cmsContents, heroBanners } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth/session";
 import { CMSEditor } from "@/components/admin/cms-editor";
+import { asc } from "drizzle-orm";
 
 export default async function AdminCMSPage() {
   await requireAdmin();
-  const contents = await prisma.cMSContent.findMany({ orderBy: { section: "asc" } });
-  const banners = await prisma.heroBanner.findMany({ orderBy: { order: "asc" } });
+
+  let contents: any[] = [];
+  let banners: any[] = [];
+  try {
+    contents = await db.select().from(cmsContents).orderBy(asc(cmsContents.section));
+    banners = await db.select().from(heroBanners).orderBy(asc(heroBanners.order));
+  } catch {}
 
   return (
     <div className="space-y-6">

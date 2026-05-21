@@ -1,13 +1,16 @@
-import { prisma } from "@/lib/db/prisma";
+import { db, coupons as couponsTable } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth/session";
 import { formatPrice } from "@/lib/utils/cn";
 import { Badge } from "@/components/ui/badge";
+import { desc } from "drizzle-orm";
 
 export default async function AdminCouponsPage() {
   await requireAdmin();
-  const coupons = await prisma.coupon.findMany({
-    orderBy: { createdAt: "desc" },
-  });
+
+  let coupons: any[] = [];
+  try {
+    coupons = await db.select().from(couponsTable).orderBy(desc(couponsTable.createdAt));
+  } catch {}
 
   return (
     <div className="space-y-6">

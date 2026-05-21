@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db/prisma";
+import { db, reviews } from "@/lib/db";
+import { eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -8,7 +9,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   try {
     const { id } = await params;
     const { isApproved } = await req.json();
-    const review = await prisma.review.update({ where: { id }, data: { isApproved } });
+    const [review] = await db.update(reviews).set({ isApproved }).where(eq(reviews.id, id)).returning();
     return NextResponse.json(review);
   } catch {
     return NextResponse.json({ error: "Failed to update review" }, { status: 500 });
@@ -20,7 +21,7 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
   if (session?.user?.role !== "ADMIN") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   try {
     const { id } = await params;
-    await prisma.review.delete({ where: { id } });
+    await db.delete(reviews).where(eq(reviews.id, id));
     return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json({ error: "Failed to delete review" }, { status: 500 });

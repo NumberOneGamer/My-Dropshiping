@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db/prisma";
+import { db, wishlistItems, products } from "@/lib/db";
+import { eq, and } from "drizzle-orm";
 
 export async function POST(req: NextRequest) {
   try {
@@ -10,16 +11,18 @@ export async function POST(req: NextRequest) {
     }
     const userId = (session.user as any).id;
 
-    const existing = await prisma.wishlistItem.findUnique({
-      where: { userId_productId: { userId, productId } },
-    });
+    const [existing] = await db
+      .select()
+      .from(wishlistItems)
+      .where(and(eq(wishlistItems.userId, userId), eq(wishlistItems.productId, productId)))
+      .limit(1);
 
     if (existing) {
-      await prisma.wishlistItem.delete({ where: { id: existing.id } });
+      await db.delete(wishlistItems).where(eq(wishlistItems.id, existing.id));
       return NextResponse.json({ added: false });
     }
 
-    await prisma.wishlistItem.create({ data: { userId, productId } });
+    await db.insert(wishlistItems).values({ userId, productId });
     return NextResponse.json({ added: true });
   } catch {
     return NextResponse.json({ error: "Failed" }, { status: 500 });
@@ -33,12 +36,18 @@ export async function GET() {
   }
   const userId = (session.user as any).id;
 
-  const items = await prisma.wishlistItem.findMany({
-    where: { userId },
-    include: { product: true },
-  });
+  const rows = await db
+    .select()
+    .from(wishlistItems)
+    .leftJoin(products, eq(wishlistItems.productId, products.id))
+    .where(eq(wishlistItems.userId, userId));
 
-  return NextResponse.json(items);
+  return NextResponse.json(
+    rows.map((row) => ({
+      ...row.wishlist_items,
+      product: row.products,
+    }))
+  );
 }
 
 export const runtime = 'edge';

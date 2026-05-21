@@ -1,15 +1,26 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db/prisma";
+import { db, orders, orderItems, products } from "@/lib/db";
+import { eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const order = await prisma.order.findUnique({
-    where: { id },
-    include: { items: { include: { product: true } } },
-  });
+  const [order] = await db.select().from(orders).where(eq(orders.id, id)).limit(1);
   if (!order) return NextResponse.json({ error: "Not found" }, { status: 404 });
-  return NextResponse.json(order);
+
+  const items = await db
+    .select()
+    .from(orderItems)
+    .leftJoin(products, eq(orderItems.productId, products.id))
+    .where(eq(orderItems.orderId, id));
+
+  return NextResponse.json({
+    ...order,
+    items: items.map((item) => ({
+      ...item.order_items,
+      product: item.products,
+    })),
+  });
 }
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -21,7 +32,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     const validStatuses = ["PENDING", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED"];
     if (status && !validStatuses.includes(status)) return NextResponse.json({ error: "Invalid status" }, { status: 400 });
 
-    const order = await prisma.order.update({ where: { id }, data: { status } });
+    const [order] = await db.update(orders).set({ status }).where(eq(orders.id, id)).returning();
     return NextResponse.json(order);
   } catch {
     return NextResponse.json({ error: "Failed to update order" }, { status: 500 });

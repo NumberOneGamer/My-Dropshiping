@@ -1,12 +1,25 @@
-import { prisma } from "@/lib/db/prisma";
+import { db, users, orders } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth/session";
+import { desc, count } from "drizzle-orm";
 
 export default async function AdminCustomersPage() {
   await requireAdmin();
-  const customers = await prisma.user.findMany({
-    orderBy: { createdAt: "desc" },
-    include: { _count: { select: { orders: true } } },
-  });
+
+  let customers: any[] = [];
+  try {
+    const rawCustomers = await db.select().from(users).orderBy(desc(users.createdAt));
+    const orderCounts = await db.select({
+      userId: orders.userId,
+      count: count(),
+    }).from(orders)
+      .groupBy(orders.userId);
+
+    const countMap = new Map(orderCounts.map(o => [o.userId, o.count]));
+    customers = rawCustomers.map(u => ({
+      ...u,
+      _count: { orders: countMap.get(u.id) ?? 0 },
+    }));
+  } catch {}
 
   return (
     <div className="space-y-6">

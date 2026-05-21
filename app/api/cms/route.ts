@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db/prisma";
+import { db, cmsContents } from "@/lib/db";
+import { eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 
 export async function GET(req: NextRequest) {
@@ -7,11 +8,11 @@ export async function GET(req: NextRequest) {
   const section = searchParams.get("section");
 
   try {
-    const where = section ? { section } : {};
-    const contents = await prisma.cMSContent.findMany({
-      where,
-      orderBy: { section: "asc" },
-    });
+    if (section) {
+      const contents = await db.select().from(cmsContents).where(eq(cmsContents.section, section)).orderBy(cmsContents.section);
+      return NextResponse.json(contents);
+    }
+    const contents = await db.select().from(cmsContents).orderBy(cmsContents.section);
     return NextResponse.json(contents);
   } catch {
     if (section === "hero") {
@@ -27,19 +28,13 @@ export async function PUT(req: NextRequest) {
   try {
     const { section, title, subtitle, content, isActive } = await req.json();
 
-    const existing = await prisma.cMSContent.findUnique({
-      where: { section },
-    });
+    const existingRows = await db.select().from(cmsContents).where(eq(cmsContents.section, section)).limit(1);
+    const existing = existingRows[0] || null;
 
     if (existing) {
-      await prisma.cMSContent.update({
-        where: { section },
-        data: { title, subtitle, content, isActive },
-      });
+      await db.update(cmsContents).set({ title, subtitle, content, isActive }).where(eq(cmsContents.section, section));
     } else {
-      await prisma.cMSContent.create({
-        data: { section, title, subtitle, content, isActive },
-      });
+      await db.insert(cmsContents).values({ section, title, subtitle, content, isActive });
     }
 
     return NextResponse.json({ success: true });

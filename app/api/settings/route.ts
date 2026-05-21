@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db/prisma";
+import { db, siteSettings } from "@/lib/db";
+import { eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 
 export async function PUT(req: NextRequest) {
@@ -7,12 +8,16 @@ export async function PUT(req: NextRequest) {
   if (session?.user?.role !== "ADMIN") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   try {
     const settings = await req.json();
-    const data = await prisma.siteSettings.upsert({
-      where: { id: "default" },
-      create: { id: "default", ...settings },
-      update: settings,
-    });
-    return NextResponse.json(data);
+    const existingRows = await db.select().from(siteSettings).where(eq(siteSettings.id, "default")).limit(1);
+    const existing = existingRows[0] || null;
+
+    if (existing) {
+      const [data] = await db.update(siteSettings).set(settings).where(eq(siteSettings.id, "default")).returning();
+      return NextResponse.json(data);
+    } else {
+      const [data] = await db.insert(siteSettings).values({ id: "default", ...settings }).returning();
+      return NextResponse.json(data);
+    }
   } catch {
     return NextResponse.json(
       { error: "Failed to save settings" },
@@ -23,8 +28,8 @@ export async function PUT(req: NextRequest) {
 
 export async function GET() {
   try {
-    const settings = await prisma.siteSettings.findFirst();
-    return NextResponse.json(settings || {});
+    const result = await db.select().from(siteSettings).limit(1);
+    return NextResponse.json(result[0] || {});
   } catch {
     return NextResponse.json({ announcementText: "Free shipping on all orders over $50", announcementEnabled: true });
   }

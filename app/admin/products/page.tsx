@@ -1,17 +1,37 @@
-import { prisma } from "@/lib/db/prisma";
+import { db, products as productsTable, categories, reviews } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth/session";
 import { formatPrice } from "@/lib/utils/cn";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
+import { asc, count, inArray } from "drizzle-orm";
 
 export default async function AdminProductsPage() {
   await requireAdmin();
-  const products = await prisma.product.findMany({
-    orderBy: { order: "asc" },
-    include: { category: true, _count: { select: { reviews: true } } },
-  });
+
+  let products: any[] = [];
+  try {
+    const productsData = await db.select().from(productsTable).orderBy(asc(productsTable.order));
+
+    const categoryIds = [...new Set(productsData.filter(p => p.categoryId).map(p => p.categoryId!))];
+    const categoriesData = categoryIds.length > 0
+      ? await db.select().from(categories).where(inArray(categories.id, categoryIds))
+      : [];
+    const categoryMap = new Map(categoriesData.map(c => [c.id, c]));
+
+    const reviewCounts = await db.select({
+      productId: reviews.productId,
+      count: count(),
+    }).from(reviews).groupBy(reviews.productId);
+    const reviewCountMap = new Map(reviewCounts.map(r => [r.productId, r.count]));
+
+    products = productsData.map(p => ({
+      ...p,
+      category: p.categoryId ? categoryMap.get(p.categoryId) ?? null : null,
+      _count: { reviews: reviewCountMap.get(p.id) ?? 0 },
+    }));
+  } catch {}
 
   return (
     <div className="space-y-6">
